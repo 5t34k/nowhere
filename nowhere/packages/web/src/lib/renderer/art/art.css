@@ -1,0 +1,732 @@
+/* ─── Art Renderer ─── */
+
+/* ─── Base ─── */
+.art-page {
+	height: 100vh;
+	overflow: hidden;
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	-webkit-font-smoothing: antialiased;
+	/* Chrome (header/footer) — light default, overridden for dark themes */
+	--art-chrome-bg: #ffffff;
+	--art-chrome-border: rgba(0, 0, 0, 0.08);
+	--art-chrome-text: #222;
+	--art-chrome-text-muted: #999;
+}
+
+/* Dark theme chrome overrides */
+.art-page.theme-d {
+	--art-chrome-bg: #111111;
+	--art-chrome-border: rgba(255, 255, 255, 0.08);
+	--art-chrome-text: #c8c8c0;
+	--art-chrome-text-muted: #555;
+}
+
+
+/* Off-white theme */
+.art-page.theme-p {
+	--art-chrome-bg: #f0ede8;
+}
+
+/* ─── Header ─── */
+.art-header {
+	flex-shrink: 0;
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 1.5rem;
+	height: 44px;
+	background: var(--art-chrome-bg);
+	border-bottom: 1px solid var(--art-chrome-border);
+}
+
+.art-header-brand {
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--art-chrome-text);
+	text-transform: lowercase;
+	text-decoration: none;
+}
+
+.art-header-brand:hover {
+	text-decoration: none;
+}
+
+.art-header-divider {
+	opacity: 0.4;
+	user-select: none;
+}
+
+.art-header-type {
+	font-size: 0.7rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--art-chrome-text-muted);
+}
+
+/* ─── SVG container ─── */
+.art-svg-wrap {
+	cursor: pointer;
+}
+
+.art-svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+.art-svg svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+/* ─── Controls (share/save/print) ─── */
+.art-controls {
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	padding: 16px 20px 12px;
+}
+
+@media (min-width: 640px) {
+	.art-controls {
+		position: fixed;
+		bottom: 20px;
+		right: 20px;
+		z-index: 50;
+		padding: 0;
+		justify-content: flex-end;
+		opacity: 0;
+		transition: opacity 200ms ease;
+	}
+
+	.art-page:hover .art-controls,
+	.art-page:focus-within .art-controls {
+		opacity: 1;
+	}
+}
+
+.art-ctrl-btn {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 6px 12px;
+	background: rgba(255, 255, 255, 0.92);
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 500;
+	color: #333;
+	cursor: pointer;
+	backdrop-filter: blur(4px);
+	transition: background 150ms ease, border-color 150ms ease;
+	font-family: inherit;
+}
+
+.art-ctrl-btn:hover {
+	background: rgba(255, 255, 255, 1);
+	border-color: rgba(0, 0, 0, 0.22);
+}
+
+/* Dark theme controls invert */
+.art-page.theme-d .art-ctrl-btn {
+	background: rgba(30, 30, 30, 0.88);
+	border-color: rgba(255, 255, 255, 0.12);
+	color: #ddd;
+}
+
+.art-page.theme-d .art-ctrl-btn:hover {
+	background: rgba(40, 40, 40, 0.98);
+	border-color: rgba(255, 255, 255, 0.22);
+}
+
+/* ─── QR modal ─── */
+.art-qr-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.5);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	animation: art-fade-in 150ms ease;
+}
+
+.art-qr-modal {
+	background: #fff;
+	border: 1px solid #e5e5e5;
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: 0 4px 24px rgba(0, 0, 0, 0.16);
+	animation: art-scale-in 180ms ease;
+	max-width: 400px;
+	width: 90vw;
+}
+
+.art-qr-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 16px;
+	border-bottom: 1px solid #e5e5e5;
+}
+
+.art-qr-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: #111;
+}
+
+.art-qr-close {
+	background: none;
+	border: none;
+	cursor: pointer;
+	color: #999;
+	display: flex;
+	align-items: center;
+	padding: 2px;
+	transition: color 150ms ease;
+}
+
+.art-qr-close:hover { color: #333; }
+
+.art-qr-body {
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+}
+
+.art-qr-body img {
+	width: 240px;
+	height: 240px;
+	border-radius: 4px;
+	display: block;
+}
+
+.art-qr-copy {
+	background: none;
+	border: none;
+	padding: 0;
+	font-size: 12px;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	color: #999;
+	cursor: pointer;
+	transition: color 150ms ease;
+}
+
+.art-qr-copy:hover { color: #555; }
+
+@keyframes art-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes art-scale-in {
+	from { opacity: 0; transform: scale(0.96); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: GALLERY (g)
+   White room — artwork fills available height, meta below
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-g {
+	background: #ffffff;
+}
+
+.art-page.theme-g .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 5vh 8vw;
+	box-sizing: border-box;
+	gap: 16px;
+}
+
+.art-page.theme-g .art-svg-wrap {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	max-width: 900px;
+	/* drop-shadow follows artwork shape, not the rectangular letterbox */
+	filter: drop-shadow(0 4px 16px rgba(0,0,0,0.22)) drop-shadow(0 8px 32px rgba(0,0,0,0.16));
+}
+
+.art-page.theme-g .art-meta {
+	flex-shrink: 0;
+	text-align: center;
+	width: 100%;
+	max-width: 900px;
+}
+
+.art-page.theme-g .art-meta-title {
+	font-size: 15px;
+	font-weight: 600;
+	color: #111;
+	margin-bottom: 4px;
+}
+
+.art-page.theme-g .art-meta-attribution {
+	font-size: 12px;
+	color: #999;
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: BLEED (b)
+   Full viewport edge to edge, no chrome
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-b {
+	background: #000;
+	height: auto;
+	overflow: visible;
+}
+
+.art-page.theme-b .art-stage {
+	flex: 1;
+}
+
+.art-page.theme-b .art-svg-wrap {
+	width: 100%;
+}
+
+/* Fill full width — height follows aspect ratio, scrollable if taller than viewport */
+.art-page.theme-b .art-svg {
+	width: 100%;
+	height: auto;
+}
+
+.art-page.theme-b .art-svg svg {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+
+.art-page.theme-b .art-meta { display: none; }
+
+/* ════════════════════════════════════════════════════
+   THEME: BORDER (r)
+   White background, single black rule around artwork
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-r {
+	background: #ffffff;
+}
+
+.art-page.theme-r .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6vh 8vw;
+	box-sizing: border-box;
+	gap: 16px;
+}
+
+.art-page.theme-r .art-svg-wrap {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	max-width: 880px;
+	border: 1.5px solid #111111;
+}
+
+.art-page.theme-r .art-meta {
+	flex-shrink: 0;
+	text-align: center;
+	width: 100%;
+	max-width: 880px;
+}
+
+.art-page.theme-r .art-meta-title {
+	font-size: 11px;
+	font-weight: 500;
+	color: #222;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+
+.art-page.theme-r .art-meta-attribution {
+	font-size: 11px;
+	color: #888;
+	margin-top: 3px;
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: STAMP (s)
+   Small centred artwork in a large field of white
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-s {
+	background: #ffffff;
+}
+
+.art-page.theme-s .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	padding: 4vh 8vw;
+	box-sizing: border-box;
+}
+
+.art-page.theme-s .art-svg-wrap {
+	/* Fixed small size — constrained by both viewport width and height */
+	width: min(280px, 45vw, 45vh);
+	flex-shrink: 0;
+	filter: drop-shadow(0 4px 16px rgba(0,0,0,0.22)) drop-shadow(0 8px 32px rgba(0,0,0,0.16));
+}
+
+/* Stamp: no defined height on wrapper — let SVG size by intrinsic aspect ratio */
+.art-page.theme-s .art-svg,
+.art-page.theme-s .art-svg svg {
+	height: auto;
+}
+
+.art-page.theme-s .art-meta {
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.art-page.theme-s .art-meta-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: #111;
+}
+
+.art-page.theme-s .art-meta-attribution {
+	font-size: 11px;
+	color: #999;
+	margin-top: 3px;
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: DARK ROOM (d)
+   Near-black background, artwork fills available height
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-d {
+	background: #111111;
+}
+
+.art-page.theme-d .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6vh 8vw;
+	box-sizing: border-box;
+	gap: 16px;
+}
+
+.art-page.theme-d .art-svg-wrap {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	max-width: 860px;
+}
+
+.art-page.theme-d .art-meta {
+	flex-shrink: 0;
+	text-align: center;
+}
+
+.art-page.theme-d .art-meta-title {
+	font-size: 15px;
+	font-weight: 600;
+	color: #e5e5e0;
+}
+
+.art-page.theme-d .art-meta-attribution {
+	font-size: 12px;
+	color: #666;
+	margin-top: 4px;
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: BROADSIDE (w)
+   Full-width artwork, large title anchored below
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-w {
+	background: #ffffff;
+}
+
+.art-page.theme-w .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	padding-top: 2vh;
+	padding-bottom: 2vh;
+}
+
+.art-page.theme-w .art-svg-wrap {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+}
+
+.art-page.theme-w .art-meta {
+	flex-shrink: 0;
+	padding: 20px 6vw 28px;
+}
+
+.art-page.theme-w .art-meta-title {
+	font-size: clamp(24px, 5vw, 60px);
+	font-weight: 800;
+	color: #111;
+	line-height: 1.1;
+	letter-spacing: -0.02em;
+}
+
+.art-page.theme-w .art-meta-attribution {
+	font-size: clamp(12px, 1.5vw, 16px);
+	color: #888;
+	margin-top: 8px;
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: MANIFESTO (m)
+   Split — artwork left fills viewport height, text right
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-m {
+	background: #ffffff;
+}
+
+.art-page.theme-m .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: row;
+	padding-top: 2vh;
+	padding-bottom: 2vh;
+}
+
+.art-page.theme-m .art-svg-wrap {
+	flex: 1;
+	min-height: 0;
+}
+
+.art-page.theme-m .art-meta {
+	width: 300px;
+	flex-shrink: 0;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 48px 40px;
+	border-left: 1px solid #e5e5e5;
+	overflow-y: auto;
+}
+
+.art-page.theme-m .art-meta-title {
+	font-size: clamp(20px, 2.5vw, 38px);
+	font-weight: 800;
+	color: #111;
+	line-height: 1.15;
+	letter-spacing: -0.02em;
+}
+
+.art-page.theme-m .art-meta-attribution {
+	font-size: 13px;
+	color: #888;
+	margin-top: 14px;
+}
+
+@media (max-width: 700px) {
+	.art-page.theme-m .art-stage {
+		flex-direction: column;
+	}
+	.art-page.theme-m .art-svg-wrap {
+		flex: 1;
+	}
+	.art-page.theme-m .art-meta {
+		width: auto;
+		flex-shrink: 0;
+		border-left: none;
+		border-top: 1px solid #e5e5e5;
+		padding: 24px;
+		max-height: 30vh;
+	}
+}
+
+/* ════════════════════════════════════════════════════
+   THEME: PASTE-UP (p)
+   Off-white background, artwork slightly rotated
+   ═══════════════════════════════════════════════════ */
+.art-page.theme-p {
+	background: #f0ede8;
+}
+
+.art-page.theme-p .art-stage {
+	flex: 1;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 6vh 12vw;
+	gap: 16px;
+	box-sizing: border-box;
+}
+
+.art-page.theme-p .art-svg-wrap {
+	flex: 1;
+	min-height: 0;
+	width: 100%;
+	max-width: 600px;
+	transform: rotate(1.8deg);
+	filter: drop-shadow(2px 4px 12px rgba(0,0,0,0.20)) drop-shadow(0 8px 28px rgba(0,0,0,0.14));
+}
+
+.art-page.theme-p .art-meta {
+	flex-shrink: 0;
+	text-align: center;
+	transform: rotate(1.8deg);
+}
+
+.art-page.theme-p .art-meta-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: #333;
+}
+
+.art-page.theme-p .art-meta-attribution {
+	font-size: 12px;
+	color: #888;
+	margin-top: 3px;
+}
+
+/* ════════════════════════════════════════════════════
+   PRINT / POSTER MODE
+   Restore scrollable layout — artwork renders at full size
+   ═══════════════════════════════════════════════════ */
+@media print {
+	.art-header,
+	.art-footer,
+	.art-controls,
+	.art-qr-backdrop {
+		display: none !important;
+	}
+
+	/* Restore scrollable layout for print */
+	.art-page {
+		height: auto;
+		overflow: visible;
+	}
+
+	/* ── Gallery print ── */
+	.art-page.theme-g .art-stage {
+		flex: none;
+		padding: 12mm 12mm 8mm;
+		max-width: none;
+	}
+	.art-page.theme-g .art-svg-wrap {
+		flex: none;
+		width: 100%;
+		max-width: none;
+		filter: none;
+	}
+
+	/* ── Bleed print ── */
+	.art-page.theme-b .art-stage {
+		flex: none;
+	}
+
+	/* ── Border print ── */
+	.art-page.theme-r .art-stage {
+		flex: none;
+		padding: 10mm 10mm 6mm;
+		max-width: none;
+	}
+	.art-page.theme-r .art-svg-wrap {
+		flex: none;
+		width: 100%;
+		max-width: none;
+	}
+
+	/* ── Stamp print ── */
+	.art-page.theme-s .art-stage {
+		flex: none;
+		justify-content: flex-start;
+		padding: 12mm 12mm 8mm;
+	}
+	.art-page.theme-s .art-svg-wrap {
+		width: 160px;
+	}
+
+	/* ── Dark room print ── */
+	.art-page.theme-d .art-stage {
+		flex: none;
+		padding: 12mm 12mm 8mm;
+		max-width: none;
+	}
+	.art-page.theme-d .art-svg-wrap {
+		flex: none;
+		width: 100%;
+		max-width: none;
+	}
+
+	/* ── Broadside print ── */
+	.art-page.theme-w .art-stage {
+		flex: none;
+	}
+	.art-page.theme-w .art-svg-wrap {
+		flex: none;
+		width: 100%;
+	}
+	.art-page.theme-w .art-meta {
+		padding: 10mm 10mm 12mm;
+	}
+
+	/* ── Manifesto print ── */
+	.art-page.theme-m .art-stage {
+		flex: none;
+		min-height: 100vh;
+	}
+	.art-page.theme-m .art-svg-wrap {
+		flex: 1;
+	}
+
+	/* ── Paste-up print ── */
+	.art-page.theme-p .art-stage {
+		flex: none;
+		padding: 12mm 12mm 8mm;
+	}
+	.art-page.theme-p .art-svg-wrap {
+		width: min(560px, 78vw);
+	}
+
+	/* ── QR code (print only) ── */
+	.art-print-qr {
+		display: block !important;
+		position: fixed;
+		bottom: 12mm;
+		right: 12mm;
+		width: 80mm;
+		height: 80mm;
+	}
+
+	.art-print-qr img {
+		width: 80mm;
+		height: 80mm;
+		display: block;
+	}
+}
+
+/* Hide print QR in screen mode */
+.art-print-qr {
+	display: none;
+}

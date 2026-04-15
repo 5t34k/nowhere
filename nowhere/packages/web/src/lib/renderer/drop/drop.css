@@ -1,0 +1,526 @@
+/* ─── Drop Renderer ─── */
+
+/* ─── Light theme (base) ─── */
+.drop-page {
+	--drop-bg: #FAFAF7;
+	--drop-doc-bg: #ffffff;
+	--drop-text: #111111;
+	--drop-text-secondary: #3d3935;
+	--drop-text-muted: #999999;
+	--drop-border: #e5e5e5;
+	--drop-gutter-bg: #f5f5f3;
+	--drop-gutter-text: #c8c8c0;
+	--drop-doc-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.07);
+
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--drop-text);
+	background: var(--drop-bg);
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	transition: background 300ms ease, color 300ms ease;
+	-webkit-font-smoothing: antialiased;
+}
+
+.drop-page.dark {
+	--drop-bg: #1A1A1A;
+	--drop-doc-bg: #222220;
+	--drop-text: #E5E5E0;
+	--drop-text-secondary: #A0A098;
+	--drop-text-muted: #706F68;
+	--drop-border: #333330;
+	--drop-gutter-bg: #1E1E1C;
+	--drop-gutter-text: #555550;
+	--drop-doc-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ─── Header bar ─── */
+.drop-header-bar {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0.75rem 1.5rem;
+	background: var(--drop-bg);
+	border-bottom: 1px solid var(--drop-border);
+	transition: background 300ms ease, border-color 300ms ease;
+}
+
+.drop-header-brand {
+	font-size: 0.95rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--drop-text);
+	text-transform: lowercase;
+	text-decoration: none;
+}
+
+.drop-header-brand:hover {
+	text-decoration: none;
+}
+
+.drop-header-divider {
+	opacity: 0.4;
+	user-select: none;
+}
+
+.drop-header-type {
+	font-size: 0.7rem;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	color: var(--drop-text-muted);
+}
+
+/* ─── Theme toggle (in header, right side) ─── */
+.drop-theme-btn {
+	margin-left: auto;
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--drop-text-muted);
+	cursor: pointer;
+	transition: color 150ms ease;
+}
+
+.drop-theme-btn:hover {
+	color: var(--drop-text-secondary);
+}
+
+/* ─── Stage: centers document vertically on short content ─── */
+.drop-stage {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 48px 24px 56px;
+	box-sizing: border-box;
+}
+
+/* ─── Wrapper: centers document + seal as a unit ─── */
+.drop-doc-wrapper {
+	width: 100%;
+	max-width: 980px;
+	margin: auto;
+}
+
+/* ─── Document card ─── */
+.drop-document {
+	width: 100%;
+	background: var(--drop-doc-bg);
+	border: 1px solid var(--drop-border);
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: var(--drop-doc-shadow);
+	transition: background 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+}
+
+/* ─── Document header ─── */
+.drop-doc-header {
+	padding: 16px 20px;
+	border-bottom: 1px solid var(--drop-border);
+	background: var(--drop-gutter-bg);
+	transition: background 300ms ease, border-color 300ms ease;
+}
+
+.drop-doc-header-main {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+/* ─── Title ─── */
+.drop-title {
+	font-size: 18px;
+	font-weight: 600;
+	letter-spacing: -0.01em;
+	line-height: 1.3;
+	margin: 0;
+	color: var(--drop-text);
+	min-width: 0;
+}
+
+.drop-title.untitled {
+	color: var(--drop-text-muted);
+	font-style: italic;
+	font-weight: 400;
+}
+
+/* ─── Doc action buttons (Copy, Download) ─── */
+.drop-doc-actions {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	flex-shrink: 0;
+}
+
+.drop-doc-btn {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 10px;
+	border: 1px solid var(--drop-border);
+	border-radius: 4px;
+	background: var(--drop-doc-bg);
+	color: var(--drop-text-secondary);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 11px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: color 200ms ease, border-color 200ms ease, background 300ms ease;
+}
+
+.drop-doc-btn:hover {
+	color: var(--drop-text);
+	border-color: var(--drop-text-muted);
+}
+
+/* ─── Author row (inside doc header) ─── */
+.drop-doc-author {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin-top: 10px;
+}
+
+@media (min-width: 640px) {
+	.drop-doc-author {
+		flex-direction: row;
+		align-items: center;
+		gap: 10px;
+	}
+}
+
+.drop-author-phrase {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--drop-text-secondary);
+	line-height: 1.4;
+}
+
+.drop-author-phrase.signed {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.drop-author-phrase.unsigned {
+	font-style: italic;
+	color: var(--drop-text-muted);
+}
+
+.signed-check {
+	flex-shrink: 0;
+	opacity: 0.6;
+}
+
+.drop-author-npub {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--drop-text-muted);
+	cursor: pointer;
+	border: none;
+	background: none;
+	padding: 0;
+	transition: color 200ms ease;
+	text-align: left;
+}
+
+.drop-author-npub:hover {
+	color: var(--drop-text-secondary);
+}
+
+/* ─── Document body (line-by-line) ─── */
+.drop-doc-body {
+	overflow-x: hidden;
+	position: relative;
+}
+
+.drop-doc-body::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 48px;
+	background: var(--drop-gutter-bg);
+	border-right: 1px solid var(--drop-border);
+	pointer-events: none;
+	transition: background 300ms ease, border-color 300ms ease;
+}
+
+.drop-line {
+	display: flex;
+	align-items: flex-start;
+}
+
+.drop-line:first-child .drop-line-num,
+.drop-line:first-child .drop-line-text {
+	padding-top: 14px;
+}
+
+.drop-line:last-child .drop-line-num,
+.drop-line:last-child .drop-line-text {
+	padding-bottom: 14px;
+}
+
+.drop-line-num {
+	flex-shrink: 0;
+	width: 48px;
+	padding: 0 10px 0 0;
+	text-align: right;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--drop-gutter-text);
+	user-select: none;
+	position: relative;
+	z-index: 1;
+}
+
+.drop-line-text {
+	flex: 1;
+	padding: 0 16px;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--drop-text);
+	white-space: pre-wrap;
+	word-break: break-word;
+	overflow-wrap: break-word;
+	tab-size: 4;
+	min-height: 1.6em;
+}
+
+/* ─── Drop seal (phrase beneath the document) ─── */
+.drop-seal {
+	margin-top: 14px;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--drop-text-muted);
+	text-align: center;
+	letter-spacing: 0.02em;
+}
+
+/* ─── QR document overlay ─── */
+.qr-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	cursor: pointer;
+	animation: qr-fade-in 150ms ease;
+}
+
+.qr-document {
+	width: 480px;
+	background: var(--drop-doc-bg);
+	border: 1px solid var(--drop-border);
+	border-radius: 8px;
+	overflow: hidden;
+	box-shadow: var(--drop-doc-shadow);
+	cursor: default;
+	animation: qr-scale-in 180ms ease;
+}
+
+.qr-doc-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	background: var(--drop-gutter-bg);
+	border-bottom: 1px solid var(--drop-border);
+}
+
+.qr-doc-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--drop-text);
+	letter-spacing: -0.01em;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.qr-doc-close {
+	background: none;
+	border: none;
+	color: var(--drop-text-muted);
+	cursor: pointer;
+	padding: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	transition: color 150ms ease;
+}
+
+.qr-doc-close:hover {
+	color: var(--drop-text);
+}
+
+.qr-doc-body {
+	position: relative;
+	overflow: hidden;
+}
+
+.qr-doc-body::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	width: 48px;
+	background: var(--drop-gutter-bg);
+	border-right: 1px solid var(--drop-border);
+	pointer-events: none;
+	transition: background 300ms ease, border-color 300ms ease;
+}
+
+.qr-image-row {
+	display: flex;
+}
+
+.qr-line-gutter {
+	flex-shrink: 0;
+	width: 48px;
+}
+
+.qr-image-cell {
+	flex: 1;
+	display: flex;
+	justify-content: center;
+	padding: 24px 20px 16px;
+}
+
+.qr-image-cell img {
+	width: 340px;
+	height: 340px;
+	border-radius: 4px;
+	display: block;
+}
+
+.qr-doc-line {
+	display: flex;
+	align-items: flex-start;
+}
+
+.qr-doc-line:last-child .qr-line-num,
+.qr-doc-line:last-child .qr-line-text {
+	padding-bottom: 16px;
+}
+
+.qr-line-num {
+	flex-shrink: 0;
+	width: 48px;
+	padding: 0 10px 0 0;
+	text-align: right;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--drop-gutter-text);
+	user-select: none;
+	position: relative;
+	z-index: 1;
+}
+
+.qr-line-text {
+	flex: 1;
+	padding: 0 16px;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--drop-text);
+	text-align: center;
+}
+
+.qr-copy-link {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 13px;
+	line-height: 1.6;
+	color: var(--drop-text-muted);
+	cursor: pointer;
+	transition: color 150ms ease;
+}
+
+.qr-copy-link:hover {
+	color: var(--drop-text-secondary);
+}
+
+@keyframes qr-fade-in {
+	from { opacity: 0; }
+	to { opacity: 1; }
+}
+
+@keyframes qr-scale-in {
+	from { opacity: 0; transform: scale(0.96); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+	.drop-stage {
+		padding: 12px 0 48px;
+	}
+
+	.drop-doc-wrapper {
+		margin: 0;
+	}
+
+	.drop-document {
+		border-radius: 0;
+		border-left: none;
+		border-right: none;
+		box-shadow: none;
+	}
+
+	.drop-title {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.btn-label {
+		display: none;
+	}
+
+	.drop-doc-btn {
+		width: 40px;
+		height: 40px;
+		padding: 0;
+		justify-content: center;
+	}
+
+	.drop-line-text {
+		font-size: 12px;
+	}
+
+	.qr-document {
+		width: calc(100vw - 32px);
+	}
+
+	.qr-image-cell {
+		padding: 20px 16px 12px;
+	}
+
+	.qr-image-cell img {
+		width: 100%;
+		height: auto;
+	}
+}

@@ -1,0 +1,30 @@
+{
+	"name": "@nowhere/nowhr",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"prepare": "svelte-kit sync || echo ''",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
+	},
+	"dependencies": {
+		"@nowhere/codec": "workspace:*",
+		"nostr-tools": "^2.23.1",
+		"qrcode": "^1.5.4",
+		"zxing-wasm": "^3.0.1"
+	},
+	"devDependencies": {
+		"@noble/hashes": "^2.0.1",
+		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/kit": "^2.50.2",
+		"@sveltejs/vite-plugin-svelte": "^6.2.4",
+		"@types/qrcode": "^1.5.6",
+		"svelte": "^5.49.2",
+		"svelte-check": "^4.3.6",
+		"typescript": "^5.9.3",
+		"vite": "^7.3.1"
+	}
+}

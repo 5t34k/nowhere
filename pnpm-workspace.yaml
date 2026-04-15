@@ -1,0 +1,3 @@
+packages:
+  - 'nowhere/packages/*'
+  - 'nowhr'

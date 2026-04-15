@@ -1,0 +1,811 @@
+/* ─── Message Renderer — Self-contained typography-first design ─── */
+
+/* ─── CSS Custom Properties ─── */
+.message-page {
+	--msg-bg: #FAFAF7;
+	--msg-text: #1A1A1A;
+	--msg-text-secondary: #555550;
+	--msg-text-muted: #999990;
+	--msg-border: #E5E5E0;
+	--msg-link: #2563EB;
+	--msg-link-hover: #1D4ED8;
+	--msg-code-bg: #F0F0EC;
+	--msg-quote-border: #D4D4CF;
+	--msg-accent: #999990;
+
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 20px;
+	line-height: 1.75;
+	color: var(--msg-text);
+	background: var(--msg-bg);
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	transition: background 300ms ease, color 300ms ease;
+	-webkit-font-smoothing: antialiased;
+}
+
+.message-page.dark {
+	--msg-bg: #1A1A1A;
+	--msg-text: #E5E5E0;
+	--msg-text-secondary: #A0A098;
+	--msg-text-muted: #706F68;
+	--msg-border: #333330;
+	--msg-link: #60A5FA;
+	--msg-link-hover: #93C5FD;
+	--msg-code-bg: #2A2A26;
+	--msg-quote-border: #444440;
+	--msg-accent: #706F68;
+}
+
+/* ─── Content Container ─── */
+.message-content {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 80px 24px 60px;
+}
+
+.message-content.short {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 100vh;
+	padding-top: 0;
+	padding-bottom: 0;
+}
+
+.message-content.short .message-body {
+	font-size: 28px;
+	line-height: 1.5;
+}
+
+/* ─── Author Block ─── */
+.message-author {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 36px;
+}
+
+.message-avatar {
+	flex-shrink: 0;
+}
+
+.message-avatar-emoji {
+	font-size: 36px;
+	line-height: 1;
+}
+
+.message-avatar-img {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.message-avatar-svg {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	overflow: hidden;
+}
+
+.message-avatar-svg svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.message-author-info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.message-author-name {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--msg-text);
+	line-height: 1.3;
+}
+
+.message-author-phrase {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	font-style: italic;
+	color: var(--msg-text-muted);
+	line-height: 1.3;
+	margin-top: 2px;
+}
+
+.message-author-phrase.signed {
+	color: var(--msg-text-secondary);
+}
+
+.message-author-phrase.unsigned {
+	font-style: italic;
+}
+
+.message-about-npub {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 0.8rem;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	border: none;
+	background: none;
+	padding: 0;
+	transition: color 200ms ease;
+}
+
+.message-about-npub:hover {
+	color: var(--msg-text-secondary);
+}
+
+/* ─── Signed Check ─── */
+.signed-check {
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 3px;
+	position: relative;
+	top: -0.5px;
+	opacity: 0.5;
+}
+
+.message-author-phrase.signed .signed-check {
+	opacity: 0.7;
+}
+
+/* ─── Title ─── */
+.message-title {
+	font-size: 36px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	margin-bottom: 16px;
+	color: var(--msg-text);
+}
+
+/* ─── Body — Markdown Elements ─── */
+.message-body {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+.message-body h1 {
+	font-size: 30px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+	margin: 40px 0 16px;
+}
+
+.message-body h2 {
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.3;
+	margin: 36px 0 12px;
+}
+
+.message-body h3 {
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.4;
+	margin: 28px 0 8px;
+}
+
+.message-body p {
+	margin: 0 0 20px;
+}
+
+.message-body ul,
+.message-body ol {
+	margin: 0 0 20px;
+	padding-left: 28px;
+}
+
+.message-body li {
+	margin-bottom: 4px;
+}
+
+.message-body blockquote {
+	margin: 0 0 20px;
+	padding: 4px 0 4px 20px;
+	border-left: 3px solid var(--msg-quote-border);
+	color: var(--msg-text-secondary);
+	font-style: italic;
+}
+
+.message-body blockquote p:last-child {
+	margin-bottom: 0;
+}
+
+.message-body code {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 0.85em;
+	padding: 2px 6px;
+	background: var(--msg-code-bg);
+	border-radius: 4px;
+}
+
+.message-body pre {
+	margin: 0 0 20px;
+	padding: 16px;
+	background: var(--msg-code-bg);
+	border-radius: 6px;
+	overflow-x: auto;
+	line-height: 1.5;
+}
+
+.message-body pre code {
+	padding: 0;
+	background: none;
+	font-size: 14px;
+}
+
+.message-body img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+	margin: 8px 0;
+}
+
+.message-body hr {
+	border: none;
+	border-top: 1px solid var(--msg-border);
+	margin: 32px 0;
+}
+
+.message-body a {
+	color: var(--msg-link);
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--msg-link) 40%, transparent);
+	text-underline-offset: 2px;
+	transition: color 200ms ease, text-decoration-color 200ms ease;
+}
+
+.message-body a:hover {
+	color: var(--msg-link-hover);
+	text-decoration-color: var(--msg-link-hover);
+}
+
+.message-body strong {
+	font-weight: 700;
+}
+
+.message-body em {
+	font-style: italic;
+}
+
+/* ─── Message Hash ─── */
+.message-hash {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--msg-text-muted);
+	margin-top: 40px;
+	padding-top: 16px;
+	border-top: 1px solid var(--msg-border);
+	word-break: break-all;
+}
+
+.message-hash-label {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 10px;
+	margin-top: 6px;
+}
+
+/* ─── Theme Toggle ─── */
+.theme-toggle {
+	position: fixed;
+	top: 16px;
+	right: 16px;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	border: 1px solid var(--msg-border);
+	background: var(--msg-bg);
+	color: var(--msg-text-secondary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background 300ms ease, border-color 300ms ease, color 300ms ease;
+	z-index: 10;
+}
+
+.theme-toggle:hover {
+	color: var(--msg-text);
+	border-color: var(--msg-text-muted);
+}
+
+/* ─── Share Button ─── */
+.share-btn {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	border: 1px solid var(--msg-border);
+	background: var(--msg-bg);
+	color: var(--msg-text-secondary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background 300ms ease, border-color 300ms ease, color 300ms ease, box-shadow 300ms ease;
+	z-index: 10;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.share-btn:hover {
+	color: var(--msg-text);
+	border-color: var(--msg-text-muted);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── QR Overlay ─── */
+.qr-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.85);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.qr-overlay.visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.qr-overlay-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.qr-overlay-content img {
+	width: 280px;
+	height: 280px;
+	border-radius: 12px;
+}
+
+.qr-overlay-label {
+	color: #E5E5E0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	margin-top: 16px;
+	opacity: 0.7;
+}
+
+.qr-overlay-title {
+	color: #FFFFFF;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 16px;
+	margin-top: 8px;
+	max-width: 300px;
+	text-align: center;
+	line-height: 1.4;
+}
+
+/* ─── Scroll Progress ─── */
+.scroll-progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 2px;
+	background: var(--msg-accent);
+	z-index: 50;
+	transition: width 100ms ease-out;
+}
+
+/* ─── Footer ─── */
+.message-footer {
+	max-width: 600px;
+	margin: auto auto 0;
+	padding: 40px 24px 40px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* ─── Footer Menu ─── */
+.footer-menu {
+	display: flex;
+	gap: 16px;
+	justify-content: center;
+}
+
+.footer-menu-item {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-menu-item:hover {
+	color: var(--msg-text-secondary);
+}
+
+.footer-menu-item.active {
+	color: var(--msg-text);
+}
+
+/* ─── Footer Panel ─── */
+.footer-panel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	color: var(--msg-text-secondary);
+}
+
+.footer-panel a {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	transition: color 200ms ease;
+}
+
+.footer-panel a:hover {
+	color: var(--msg-text);
+}
+
+.footer-panel p {
+	margin: 0;
+	text-align: center;
+	line-height: 1.6;
+	max-width: 440px;
+}
+
+/* ─── About modal ─── */
+.message-about-modal {
+	font-family: Georgia, 'Times New Roman', serif;
+}
+
+.message-about-modal section {
+	margin-bottom: 1.5rem;
+}
+
+.message-about-modal section:last-child {
+	margin-bottom: 0;
+}
+
+.message-about-modal h3 {
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin: 0 0 0.5rem;
+	color: var(--msg-text-secondary);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.message-about-modal p {
+	margin: 0 0 0.6rem;
+	font-size: 0.9rem;
+	line-height: 1.65;
+	color: var(--msg-text);
+}
+
+.message-about-modal p:last-child {
+	margin-bottom: 0;
+}
+
+.message-about-phrase {
+	margin-top: 0.75rem;
+	padding: 0.6rem 0.75rem;
+	background: var(--msg-bg-secondary, #f5f5f0);
+	border-radius: 6px;
+	font-size: 0.8rem;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	line-height: 1.5;
+	word-break: break-word;
+}
+
+.message-about-phrase-label {
+	font-weight: 600;
+	margin-right: 0.25rem;
+}
+
+/* ─── Contact crossfade ─── */
+.footer-contact-crossfade {
+	display: grid;
+	justify-items: center;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+}
+
+.footer-contact-layer {
+	grid-area: 1 / 1;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	opacity: 1;
+	transition: opacity 250ms ease;
+}
+
+.footer-contact-layer.faded {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.footer-contact-detail-layer {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.footer-contact-detail-layer.visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.footer-contact-sep {
+	color: var(--msg-text-muted);
+}
+
+.footer-contact-name {
+	border: none;
+	background: none;
+	padding: 0;
+	font: inherit;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-contact-name:hover {
+	color: var(--msg-text);
+}
+
+.footer-contact-detail-layer .footer-contact-name {
+	color: var(--msg-text);
+}
+
+.footer-contact-handle {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	margin-left: 6px;
+	transition: color 200ms ease;
+}
+
+.footer-contact-handle:hover {
+	color: var(--msg-text);
+}
+
+.footer-contact-copy {
+	cursor: pointer;
+}
+
+.footer-npub-line {
+	font-size: 13px;
+}
+
+.footer-npub {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-npub:hover {
+	color: var(--msg-text);
+}
+
+/* ─── Branding ─── */
+.message-branding {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 12px;
+	color: var(--msg-text-muted);
+	font-style: italic;
+	text-align: center;
+}
+
+.message-branding-link {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	transition: color 200ms ease;
+}
+
+.message-branding-link:hover {
+	color: var(--msg-text);
+}
+
+/* ─── QR Copy Button ─── */
+.qr-copy-btn {
+	margin-top: 20px;
+	padding: 10px 24px;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	border-radius: 6px;
+	background: transparent;
+	color: #E5E5E0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 200ms ease, border-color 200ms ease;
+}
+
+.qr-copy-btn:hover {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ─── Tip Inline Panel ─── */
+.footer-tip-crossfade {
+	display: grid;
+	justify-items: center;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+}
+
+.footer-tip-back {
+	color: var(--msg-text);
+}
+
+.footer-tip-amount {
+	display: flex;
+	gap: 6px;
+	justify-content: center;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.footer-tip-input {
+	width: 100px;
+	padding: 4px 8px;
+	border: 1px solid var(--msg-border);
+	border-radius: 4px;
+	background: var(--msg-bg);
+	color: var(--msg-text);
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 12px;
+}
+
+.footer-tip-input:focus {
+	outline: none;
+	border-color: var(--msg-text-muted);
+}
+
+.footer-tip-input::placeholder {
+	color: var(--msg-text-muted);
+}
+
+.footer-tip-send {
+	padding: 4px 10px;
+	border: 1px solid var(--msg-border);
+	border-radius: 4px;
+	background: none;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 12px;
+	color: var(--msg-text-secondary);
+	cursor: pointer;
+	transition: color 200ms ease, border-color 200ms ease;
+}
+
+.footer-tip-send:hover:not(:disabled) {
+	color: var(--msg-text);
+	border-color: var(--msg-text-muted);
+}
+
+.footer-tip-send:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+/* ─── Tip Invoice (inline) ─── */
+.footer-tip-invoice {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.footer-tip-qr {
+	width: 180px;
+	height: 180px;
+	border-radius: 6px;
+}
+
+.footer-tip-ln-address {
+	font-size: 12px;
+	color: #777;
+	word-break: break-all;
+}
+
+.footer-tip-invoice-actions {
+	display: flex;
+	gap: 6px;
+	justify-content: center;
+}
+
+.footer-tip-action {
+	padding: 4px 12px;
+	border: 1px solid var(--msg-border);
+	border-radius: 4px;
+	background: none;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 12px;
+	color: var(--msg-text-secondary);
+	cursor: pointer;
+	text-decoration: none;
+	transition: color 200ms ease, border-color 200ms ease;
+}
+
+.footer-tip-action:hover {
+	color: var(--msg-text);
+	border-color: var(--msg-text-muted);
+}
+
+.footer-tip-back-link {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 11px;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-tip-back-link:hover {
+	color: var(--msg-text-secondary);
+}
+
+.footer-tip-thanks {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	color: var(--msg-text-secondary);
+	font-style: italic;
+	text-align: center;
+	width: 100%;
+}
+
+/* ─── Tip Error (inline) ─── */
+.footer-tip-error {
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 12px;
+	color: var(--msg-text-secondary);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+	.message-content {
+		padding: 72px 20px 40px;
+	}
+
+	.message-title {
+		font-size: 28px;
+	}
+
+	.message-content.short .message-body {
+		font-size: 22px;
+	}
+
+	.message-page {
+		font-size: 18px;
+	}
+}

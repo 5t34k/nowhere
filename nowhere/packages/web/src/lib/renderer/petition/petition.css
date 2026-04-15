@@ -1,0 +1,959 @@
+/* ─── Petition Renderer — Proclamation-style document, matching message.css ─── */
+
+/* ─── Testing Banners ─── */
+.petition-testing-banner {
+	position: sticky;
+	top: 0;
+	width: 100%;
+	min-height: 32px;
+	background: #e53e3e;
+	color: #fff;
+	font-family: system-ui, -apple-system, sans-serif;
+	font-weight: 700;
+	font-size: 14px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 11;
+	letter-spacing: 0.1em;
+	padding: 6px 16px;
+	box-sizing: border-box;
+	text-align: center;
+}
+
+@media (max-width: 600px) {
+	.petition-testing-banner.ptr-relay {
+		flex-direction: column;
+		gap: 2px;
+	}
+	.petition-testing-banner.ptr-relay .ptr-dash {
+		display: none;
+	}
+}
+
+.petition-testing-banner.local-relay {
+	background: #d69e2e;
+	color: #1a1a1a;
+}
+
+.petition-testing-banner.ptr-relay {
+	background: #000;
+	color: #fff;
+}
+
+
+/* ─── CSS Custom Properties ─── */
+.petition-page {
+	--msg-bg: #FAFAF7;
+	--msg-text: #1A1A1A;
+	--msg-text-secondary: #555550;
+	--msg-text-muted: #999990;
+	--msg-border: #E5E5E0;
+	--msg-link: #2563EB;
+	--msg-link-hover: #1D4ED8;
+	--msg-code-bg: #F0F0EC;
+	--msg-quote-border: #D4D4CF;
+	--msg-accent: #999990;
+	--msg-sign-bg: #1a1715;
+	--msg-sign-bg-hover: #3d3935;
+	--msg-sign-text: #ffffff;
+
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 20px;
+	line-height: 1.75;
+	color: var(--msg-text);
+	background: var(--msg-bg);
+	min-height: 100vh;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	transition: background 300ms ease, color 300ms ease;
+	-webkit-font-smoothing: antialiased;
+}
+
+.petition-page.dark {
+	--msg-bg: #1A1A1A;
+	--msg-text: #E5E5E0;
+	--msg-text-secondary: #A0A098;
+	--msg-text-muted: #706F68;
+	--msg-border: #333330;
+	--msg-link: #60A5FA;
+	--msg-link-hover: #93C5FD;
+	--msg-code-bg: #2A2A26;
+	--msg-quote-border: #444440;
+	--msg-accent: #706F68;
+	--msg-sign-bg: #E5E5E0;
+	--msg-sign-bg-hover: #C8C8C2;
+	--msg-sign-text: #1A1A1A;
+}
+
+/* ─── Header ─── */
+.petition-header {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 12px;
+	color: var(--msg-text-muted);
+	padding: 16px 24px 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	letter-spacing: 0.02em;
+}
+
+.petition-header a {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	font-weight: 600;
+}
+
+.petition-header a:hover {
+	text-decoration: none;
+}
+
+.petition-header-sep {
+	opacity: 0.4;
+}
+
+.petition-header-type {
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	font-size: 11px;
+}
+
+/* ─── Content Container ─── */
+.petition-content {
+	max-width: 600px;
+	margin: 0 auto;
+	padding: 80px 24px 60px;
+}
+
+/* ─── Title ─── */
+.petition-title {
+	font-size: 36px;
+	font-weight: 700;
+	letter-spacing: -0.02em;
+	line-height: 1.2;
+	margin: 0 0 8px;
+	color: var(--msg-text);
+}
+
+.petition-tagline {
+	font-size: 18px;
+	color: var(--msg-text-secondary);
+	margin: 0 0 36px;
+	line-height: 1.5;
+}
+
+/* ─── Decision Makers (To: addressees) ─── */
+.petition-addressees {
+	margin-bottom: 36px;
+}
+
+.petition-addressee-label {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 11px;
+	color: var(--msg-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 6px;
+}
+
+.petition-addressee {
+	font-size: 17px;
+	line-height: 1.6;
+	color: var(--msg-text);
+}
+
+.petition-addressee-name {
+	font-weight: 600;
+}
+
+.petition-addressee-title {
+	color: var(--msg-text-secondary);
+	font-weight: 400;
+}
+
+/* ─── Cover Image ─── */
+.petition-hero {
+	margin-bottom: 36px;
+	border-radius: 6px;
+	overflow: hidden;
+}
+
+.petition-hero img {
+	width: 100%;
+	height: auto;
+	display: block;
+}
+
+/* ─── Statement Body (Markdown) ─── */
+.petition-body {
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+.petition-body h1 {
+	font-size: 30px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	line-height: 1.25;
+	margin: 40px 0 16px;
+}
+
+.petition-body h2 {
+	font-size: 24px;
+	font-weight: 700;
+	line-height: 1.3;
+	margin: 36px 0 12px;
+}
+
+.petition-body h3 {
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.4;
+	margin: 28px 0 8px;
+}
+
+.petition-body p {
+	margin: 0 0 20px;
+}
+
+.petition-body ul,
+.petition-body ol {
+	margin: 0 0 20px;
+	padding-left: 28px;
+}
+
+.petition-body li {
+	margin-bottom: 4px;
+}
+
+.petition-body blockquote {
+	margin: 0 0 20px;
+	padding: 4px 0 4px 20px;
+	border-left: 3px solid var(--msg-quote-border);
+	color: var(--msg-text-secondary);
+	font-style: italic;
+}
+
+.petition-body blockquote p:last-child {
+	margin-bottom: 0;
+}
+
+.petition-body code {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 0.85em;
+	padding: 2px 6px;
+	background: var(--msg-code-bg);
+	border-radius: 4px;
+}
+
+.petition-body pre {
+	margin: 0 0 20px;
+	padding: 16px;
+	background: var(--msg-code-bg);
+	border-radius: 6px;
+	overflow-x: auto;
+	line-height: 1.5;
+}
+
+.petition-body pre code {
+	padding: 0;
+	background: none;
+	font-size: 14px;
+}
+
+.petition-body img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 6px;
+	margin: 8px 0;
+}
+
+.petition-body hr {
+	border: none;
+	border-top: 1px solid var(--msg-border);
+	margin: 32px 0;
+}
+
+.petition-body a {
+	color: var(--msg-link);
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--msg-link) 40%, transparent);
+	text-underline-offset: 2px;
+	transition: color 200ms ease, text-decoration-color 200ms ease;
+}
+
+.petition-body a:hover {
+	color: var(--msg-link-hover);
+	text-decoration-color: var(--msg-link-hover);
+}
+
+.petition-body strong {
+	font-weight: 700;
+}
+
+.petition-body em {
+	font-style: italic;
+}
+
+/* ─── Additional Context ─── */
+.petition-context-heading {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 11px;
+	color: var(--msg-text-muted);
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin-bottom: 12px;
+}
+
+/* ─── Author Block (matches message-author pattern) ─── */
+.petition-author {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-bottom: 36px;
+}
+
+.petition-author-info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.petition-author-name {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--msg-text);
+	line-height: 1.3;
+}
+
+.petition-author-phrase {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	font-style: italic;
+	color: var(--msg-text-muted);
+	line-height: 1.3;
+	margin-top: 2px;
+}
+
+.petition-author-phrase.signed {
+	color: var(--msg-text-secondary);
+}
+
+.petition-author-phrase.unsigned {
+	font-style: italic;
+}
+
+.petition-about-npub {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 0.8rem;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	border: none;
+	background: none;
+	padding: 0;
+	transition: color 200ms ease;
+}
+
+.petition-about-npub:hover {
+	color: var(--msg-text-secondary);
+}
+
+.signed-check {
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 3px;
+	position: relative;
+	top: -0.5px;
+	opacity: 0.7;
+}
+
+/* ─── Signature Area ─── */
+.petition-signature-area {
+	margin: 32px 0;
+	padding: 32px 0;
+	border-top: 1px solid var(--msg-border);
+	border-bottom: 1px solid var(--msg-border);
+	text-align: center;
+}
+
+.petition-sig-count {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--msg-text);
+}
+
+.petition-sig-loading {
+	font-weight: 400;
+	color: var(--msg-text-muted);
+}
+
+.petition-sig-meta {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	color: var(--msg-text-muted);
+}
+
+.petition-sign-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 12px 32px;
+	border: none;
+	border-radius: 6px;
+	background: var(--msg-sign-bg);
+	color: var(--msg-sign-text);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 200ms ease;
+	margin-bottom: 16px;
+}
+
+.petition-sign-btn:hover {
+	background: var(--msg-sign-bg-hover);
+}
+
+.petition-sign-icon {
+	opacity: 0.8;
+	flex-shrink: 0;
+}
+
+/* ─── Theme Toggle ─── */
+.theme-toggle {
+	position: fixed;
+	top: 16px;
+	right: 16px;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	border: 1px solid var(--msg-border);
+	background: var(--msg-bg);
+	color: var(--msg-text-secondary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background 300ms ease, border-color 300ms ease, color 300ms ease;
+	z-index: 10;
+}
+
+.theme-toggle:hover {
+	color: var(--msg-text);
+	border-color: var(--msg-text-muted);
+}
+
+/* ─── Share Button ─── */
+.share-btn {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	border: 1px solid var(--msg-border);
+	background: var(--msg-bg);
+	color: var(--msg-text-secondary);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: background 300ms ease, border-color 300ms ease, color 300ms ease, box-shadow 300ms ease;
+	z-index: 10;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.share-btn:hover {
+	color: var(--msg-text);
+	border-color: var(--msg-text-muted);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── QR Overlay ─── */
+.qr-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.85);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+	cursor: pointer;
+	opacity: 0;
+	visibility: hidden;
+	transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.qr-overlay.visible {
+	opacity: 1;
+	visibility: visible;
+}
+
+.qr-overlay-content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.qr-overlay-content img {
+	width: 280px;
+	height: 280px;
+	border-radius: 12px;
+}
+
+.qr-overlay-label {
+	color: #E5E5E0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	margin-top: 16px;
+	opacity: 0.7;
+}
+
+.qr-overlay-title {
+	color: #FFFFFF;
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 16px;
+	margin-top: 8px;
+	max-width: 300px;
+	text-align: center;
+	line-height: 1.4;
+}
+
+.qr-copy-btn {
+	margin-top: 20px;
+	padding: 10px 24px;
+	border: 1px solid rgba(255, 255, 255, 0.25);
+	border-radius: 6px;
+	background: transparent;
+	color: #E5E5E0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background 200ms ease, border-color 200ms ease;
+}
+
+.qr-copy-btn:hover {
+	background: rgba(255, 255, 255, 0.1);
+	border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* ─── Scroll Progress ─── */
+.scroll-progress {
+	position: fixed;
+	top: 0;
+	left: 0;
+	height: 2px;
+	background: var(--msg-accent);
+	z-index: 50;
+	transition: width 100ms ease-out;
+}
+
+/* ─── Footer ─── */
+.petition-footer {
+	max-width: 600px;
+	margin: auto auto 0;
+	padding: 40px 24px 40px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+/* ─── Footer Menu ─── */
+.footer-menu {
+	display: flex;
+	gap: 16px;
+	justify-content: center;
+}
+
+.footer-menu-item {
+	background: none;
+	border: none;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-menu-item:hover {
+	color: var(--msg-text-secondary);
+}
+
+.footer-menu-item.active {
+	color: var(--msg-text);
+}
+
+/* ─── Footer Panel ─── */
+.footer-panel {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	color: var(--msg-text-secondary);
+}
+
+.footer-panel a {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	transition: color 200ms ease;
+}
+
+.footer-panel a:hover {
+	color: var(--msg-text);
+}
+
+.footer-panel p {
+	margin: 0;
+	text-align: center;
+	line-height: 1.6;
+	max-width: 440px;
+}
+
+/* ─── About modal ─── */
+.petition-about-modal {
+	font-family: Georgia, 'Times New Roman', serif;
+}
+
+.petition-about-modal section {
+	margin-bottom: 1.5rem;
+}
+
+.petition-about-modal section:last-child {
+	margin-bottom: 0;
+}
+
+.petition-about-modal h3 {
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	margin: 0 0 0.5rem;
+	color: var(--msg-text-secondary);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+.petition-about-modal p {
+	margin: 0 0 0.6rem;
+	font-size: 0.9rem;
+	line-height: 1.65;
+	color: var(--msg-text);
+}
+
+.petition-about-modal p:last-child {
+	margin-bottom: 0;
+}
+
+.petition-about-phrase {
+	margin-top: 0.75rem;
+	padding: 0.6rem 0.75rem;
+	background: var(--msg-bg-secondary, #f5f5f0);
+	border-radius: 6px;
+	font-size: 0.8rem;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	line-height: 1.5;
+	word-break: break-word;
+}
+
+.petition-about-phrase-label {
+	font-weight: 600;
+	margin-right: 0.25rem;
+}
+
+/* ─── Contact crossfade ─── */
+.footer-contact-crossfade {
+	display: grid;
+	justify-items: center;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+}
+
+.footer-contact-layer {
+	grid-area: 1 / 1;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 4px;
+	opacity: 1;
+	transition: opacity 250ms ease;
+}
+
+.footer-contact-layer.faded {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.footer-contact-detail-layer {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.footer-contact-detail-layer.visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.footer-contact-sep {
+	color: var(--msg-text-muted);
+}
+
+.footer-contact-name {
+	border: none;
+	background: none;
+	padding: 0;
+	font: inherit;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-contact-name:hover {
+	color: var(--msg-text);
+}
+
+.footer-contact-detail-layer .footer-contact-name {
+	color: var(--msg-text);
+}
+
+.footer-contact-handle {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	margin-left: 6px;
+	transition: color 200ms ease;
+}
+
+.footer-contact-handle:hover {
+	color: var(--msg-text);
+}
+
+.footer-contact-copy {
+	cursor: pointer;
+}
+
+.footer-npub-line {
+	font-size: 13px;
+}
+
+.footer-npub {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	color: var(--msg-text-muted);
+	cursor: pointer;
+	transition: color 200ms ease;
+}
+
+.footer-npub:hover {
+	color: var(--msg-text);
+}
+
+/* ─── Branding ─── */
+.petition-branding {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 12px;
+	color: var(--msg-text-muted);
+	font-style: italic;
+	text-align: center;
+}
+
+.petition-branding a {
+	color: var(--msg-text-secondary);
+	text-decoration: none;
+	transition: color 200ms ease;
+}
+
+.petition-branding a:hover {
+	color: var(--msg-text);
+}
+
+/* ─── Sign Form ─── */
+.petition-sign-form {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	margin-top: 16px;
+}
+
+.petition-sign-methods {
+	display: flex;
+	gap: 8px;
+	justify-content: center;
+	margin-bottom: 16px;
+}
+
+.petition-sign-method-btn {
+	padding: 8px 16px;
+	border: 1px solid var(--msg-border);
+	border-radius: 6px;
+	background: none;
+	color: var(--msg-text);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	cursor: pointer;
+	transition: border-color 200ms ease, background 200ms ease;
+}
+
+.petition-sign-method-btn:hover {
+	border-color: var(--msg-text-muted);
+	background: var(--msg-code-bg);
+}
+
+.petition-sign-fields {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	max-width: 360px;
+	margin: 0 auto;
+}
+
+.petition-sign-field {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.petition-sign-field label {
+	font-size: 12px;
+	color: var(--msg-text-secondary);
+	font-weight: 500;
+}
+
+.petition-sign-field input,
+.petition-sign-field textarea,
+.petition-sign-field select {
+	padding: 8px 12px;
+	border: 1px solid var(--msg-border);
+	border-radius: 4px;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	color: var(--msg-text);
+	background: var(--msg-bg);
+	transition: border-color 200ms ease;
+}
+
+.petition-sign-field input:focus,
+.petition-sign-field textarea:focus,
+.petition-sign-field select:focus {
+	outline: none;
+	border-color: var(--msg-text-muted);
+}
+
+.petition-sign-field textarea {
+	resize: vertical;
+	min-height: 60px;
+}
+
+.addr-sub {
+	margin-top: 4px;
+}
+
+.addr-row {
+	display: flex;
+	gap: 8px;
+	margin-top: 4px;
+}
+
+.addr-row input {
+	flex: 1;
+	min-width: 0;
+}
+
+.petition-sign-submit {
+	margin-top: 8px;
+	padding: 10px 32px;
+	border: 1px solid var(--msg-border);
+	border-radius: 6px;
+	background: none;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--msg-text);
+	cursor: pointer;
+	transition: border-color 200ms ease, background 200ms ease;
+}
+
+.petition-sign-submit:hover:not(:disabled) {
+	border-color: var(--msg-text-muted);
+	background: var(--msg-code-bg);
+}
+
+.petition-sign-submit:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+.petition-sign-status {
+	text-align: center;
+	font-size: 13px;
+	color: var(--msg-text-secondary);
+	padding: 16px 0;
+}
+
+.petition-sign-progress {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+}
+
+.petition-sign-spinner {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border: 2px solid var(--msg-border);
+	border-top-color: var(--msg-text-secondary);
+	border-radius: 50%;
+	animation: petition-spin 0.7s linear infinite;
+	flex-shrink: 0;
+}
+
+@keyframes petition-spin {
+	to { transform: rotate(360deg); }
+}
+
+.petition-sign-success {
+	font-style: italic;
+}
+
+.petition-sign-error {
+	color: #dc2626;
+}
+
+/* ─── Petition Hash ─── */
+.petition-hash {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: var(--msg-text-muted);
+	margin-top: 0;
+	word-break: break-all;
+}
+
+.petition-hash-label {
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 10px;
+	margin-top: 6px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 640px) {
+	.petition-content {
+		padding: 72px 20px 40px;
+	}
+
+	.petition-title {
+		font-size: 28px;
+	}
+
+	.petition-page {
+		font-size: 18px;
+	}
+}
