@@ -170,6 +170,13 @@
 	// ─── Navigation ──────────────────────────────────────────────────────────
 
 	let activeTab = $state<Tab>('overview');
+	let sidebarOpen = $state(false);
+
+	function setTab(tab: Tab) {
+		activeTab = tab;
+		sidebarOpen = false;
+		if (cacheEnabled) persistCache();
+	}
 
 	// ─── Orders ──────────────────────────────────────────────────────────────
 
@@ -616,7 +623,8 @@
 
 	// ─── Orders ───────────────────────────────────────────────────────────────
 
-	let scanDays: number | null = $state(30);
+	let scanDays: number | null | undefined = $state(undefined);
+	let scanMenuOpen = $state(false);
 	let syncProgress = $state('');
 
 	function getStoreOrderRelays(): string[] {
@@ -1552,6 +1560,18 @@ import ManageNav from './ManageNav.svelte';
 <!-- ── Dashboard ─────────────────────────────────────────────────────────── -->
 <div class="manage-page">
 	<nav class="manage-nav">
+		<button
+			class="nav-menu-toggle"
+			aria-label="Toggle navigation"
+			aria-expanded={sidebarOpen}
+			onclick={() => (sidebarOpen = !sidebarOpen)}
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" width="20" height="20">
+				<line x1="3" y1="6" x2="21" y2="6" />
+				<line x1="3" y1="12" x2="21" y2="12" />
+				<line x1="3" y1="18" x2="21" y2="18" />
+			</svg>
+		</button>
 		<a href="/" class="logo">nowhere</a>
 		<a href="/manage" class="nav-link">Manage</a>
 		<a href="/create/store" class="nav-link">Store Builder</a>
@@ -1561,12 +1581,19 @@ import ManageNav from './ManageNav.svelte';
 				<polyline points="16 17 21 12 16 7" />
 				<line x1="21" y1="12" x2="9" y2="12" />
 			</svg>
-			Sign out
+			<span class="btn-label">Sign out</span>
 		</button>
 	</nav>
 	<div class="dashboard">
+		{#if sidebarOpen}
+			<button
+				class="sidebar-backdrop"
+				aria-label="Close navigation"
+				onclick={() => (sidebarOpen = false)}
+			></button>
+		{/if}
 		<!-- Sidebar -->
-		<aside class="sidebar">
+		<aside class="sidebar" class:is-open={sidebarOpen}>
 			<div class="sidebar-top">
 				<div class="store-pill">
 					{#if loadedStores.size === 0}
@@ -1584,10 +1611,7 @@ import ManageNav from './ManageNav.svelte';
 				<button
 					class="nav-item"
 					class:active={activeTab === 'overview'}
-					onclick={() => {
-						activeTab = 'overview';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('overview')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<rect x="3" y="3" width="7" height="7" rx="1.5" />
@@ -1601,10 +1625,7 @@ import ManageNav from './ManageNav.svelte';
 				<button
 					class="nav-item"
 					class:active={activeTab === 'stores'}
-					onclick={() => {
-						activeTab = 'stores';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('stores')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
@@ -1616,10 +1637,7 @@ import ManageNav from './ManageNav.svelte';
 				<button
 					class="nav-item"
 					class:active={activeTab === 'orders'}
-					onclick={() => {
-						activeTab = 'orders';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('orders')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
@@ -1635,10 +1653,7 @@ import ManageNav from './ManageNav.svelte';
 					<button
 						class="nav-item"
 						class:active={activeTab === 'hidden'}
-						onclick={() => {
-							activeTab = 'hidden';
-							if (cacheEnabled) persistCache();
-						}}
+						onclick={() => setTab('hidden')}
 					>
 						<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 							<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24" />
@@ -1653,10 +1668,7 @@ import ManageNav from './ManageNav.svelte';
 					class="nav-item"
 					class:active={activeTab === 'inventory'}
 					disabled={!inventoryEnabled}
-					onclick={() => {
-						activeTab = 'inventory';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('inventory')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
@@ -1673,10 +1685,7 @@ import ManageNav from './ManageNav.svelte';
 					class="nav-item"
 					class:active={activeTab === 'status'}
 					disabled={!inventoryEnabled}
-					onclick={() => {
-						activeTab = 'status';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('status')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<circle cx="12" cy="12" r="10" />
@@ -1689,10 +1698,7 @@ import ManageNav from './ManageNav.svelte';
 				<button
 					class="nav-item"
 					class:active={activeTab === 'settings'}
-					onclick={() => {
-						activeTab = 'settings';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('settings')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<circle cx="12" cy="12" r="3" />
@@ -1706,10 +1712,7 @@ import ManageNav from './ManageNav.svelte';
 				<button
 					class="nav-item"
 					class:active={activeTab === 'verify'}
-					onclick={() => {
-						activeTab = 'verify';
-						if (cacheEnabled) persistCache();
-					}}
+					onclick={() => setTab('verify')}
 				>
 					<svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
 						<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -1732,49 +1735,49 @@ import ManageNav from './ManageNav.svelte';
 				<h1 class="page-title">{tabTitles[activeTab]}</h1>
 				<div class="header-actions">
 					{#if activeTab === 'orders'}
-						<button
-							class="btn-outline btn-sm"
-							onclick={() => (reconcileOpen = true)}
-							disabled={orders.length === 0}
-						>
-							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
-								<polyline points="22 4 12 14.01 9 11.01" />
-								<path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-							</svg>
-							Reconcile Payments
-						</button>
+						{#if false}
+							<button
+								class="btn-outline btn-sm icon-action"
+								onclick={() => (reconcileOpen = true)}
+								disabled={orders.length === 0}
+								aria-label="Reconcile Payments"
+							>
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
+									<polyline points="22 4 12 14.01 9 11.01" />
+									<path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+								</svg>
+								<span class="btn-label">Reconcile Payments</span>
+							</button>
+						{/if}
 						{#if sortedOrders.length > 0}
-							<button class="btn-outline btn-sm" onclick={exportOrdersCSV}>
+							<button class="btn-outline btn-sm icon-action" onclick={exportOrdersCSV} aria-label="Export CSV">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
 									<path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
 									<polyline points="7 10 12 15 17 10" />
 									<line x1="12" y1="15" x2="12" y2="3" />
 								</svg>
-								Export CSV
+								<span class="btn-label">Export CSV</span>
 							</button>
 						{/if}
-						<button class="btn-outline btn-sm" onclick={() => (fetchByIdOpen = !fetchByIdOpen)} disabled={fetchingById}>
+						<button class="btn-outline btn-sm icon-action with-label" onclick={() => (fetchByIdOpen = !fetchByIdOpen)} disabled={fetchingById} aria-label="Fetch by ID">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
 								<circle cx="11" cy="11" r="8" />
 								<line x1="21" y1="21" x2="16.65" y2="16.65" />
 							</svg>
-							Fetch by ID
+							<span class="btn-label">Fetch by ID</span>
 						</button>
 						{#if syncing}
-							<button class="btn-outline btn-sm" disabled>
-								<span class="spinner-sm"></span>{syncProgress || 'Scanning…'}
+							<button class="btn-outline btn-sm icon-action" disabled aria-label="Scanning">
+								<span class="spinner-sm"></span><span class="btn-label">{syncProgress || 'Scanning…'}</span>
 							</button>
 						{:else}
-							<div class="scan-group">
+							<button class="btn-outline btn-sm icon-action with-label" class:active={scanMenuOpen} onclick={() => (scanMenuOpen = !scanMenuOpen)} aria-label="Refresh">
 								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13">
 									<polyline points="23 4 23 10 17 10" />
 									<path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
 								</svg>
-								<button class="btn-outline btn-sm" class:active={scanDays === 1} onclick={() => { scanDays = 1; syncOrders(1); }} disabled={syncing}>1 Day</button>
-								<button class="btn-outline btn-sm" class:active={scanDays === 7} onclick={() => { scanDays = 7; syncOrders(7); }} disabled={syncing}>7 Days</button>
-								<button class="btn-outline btn-sm" class:active={scanDays === 30} onclick={() => { scanDays = 30; syncOrders(30); }} disabled={syncing}>30 Days</button>
-								<button class="btn-outline btn-sm" class:active={scanDays === null} onclick={() => { scanDays = null; syncOrders(null); }} disabled={syncing}>All</button>
-							</div>
+								<span class="btn-label">Refresh</span>
+							</button>
 						{/if}
 					{:else if activeTab === 'inventory' || activeTab === 'status'}
 						<button class="btn-outline btn-sm" onclick={loadInventoryStatus} disabled={fetchingStatus}>
@@ -1784,6 +1787,15 @@ import ManageNav from './ManageNav.svelte';
 					{/if}
 				</div>
 			</div>
+
+			{#if activeTab === 'orders' && scanMenuOpen && !syncing}
+				<div class="scan-menu">
+					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 1} onclick={() => { scanDays = 1; scanMenuOpen = false; syncOrders(1); }}>1 Day</button>
+					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 7} onclick={() => { scanDays = 7; scanMenuOpen = false; syncOrders(7); }}>7 Days</button>
+					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 30} onclick={() => { scanDays = 30; scanMenuOpen = false; syncOrders(30); }}>30 Days</button>
+					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === null} onclick={() => { scanDays = null; scanMenuOpen = false; syncOrders(null); }}>All</button>
+				</div>
+			{/if}
 
 			<div class="main-content">
 
@@ -3762,18 +3774,17 @@ Order 9f1a3c5e7b2d4f6  ·  12,800 sats"
 		color: var(--color-warning, #d97706);
 	}
 
-	.scan-group {
-		display: inline-flex;
-		align-items: center;
+	.scan-menu {
+		display: flex;
 		gap: var(--space-1);
-	}
-
-	.scan-group > svg {
-		color: var(--color-muted);
+		padding: var(--space-3) var(--space-6);
+		border-bottom: 1px solid var(--color-border);
+		background: var(--color-bg);
+		justify-content: flex-end;
 		flex-shrink: 0;
 	}
 
-	.scan-group .btn-outline.active {
+	.scan-menu .btn-outline.active {
 		background: var(--color-text);
 		color: var(--color-bg);
 		border-color: var(--color-text);
@@ -5122,5 +5133,192 @@ Order 9f1a3c5e7b2d4f6  ·  12,800 sats"
 
 	.mono {
 		font-family: var(--font-mono);
+	}
+
+	/* ─── Mobile nav toggle & drawer ─────────────────────────────────────────── */
+
+	.nav-menu-toggle {
+		display: none;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		padding: 0;
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: var(--radius-sm);
+		color: var(--color-text);
+		cursor: pointer;
+		transition: background var(--transition-fast), border-color var(--transition-fast);
+	}
+
+	.nav-menu-toggle:hover {
+		background: var(--color-bg-secondary);
+		border-color: var(--color-border);
+	}
+
+	.sidebar-backdrop {
+		display: none;
+		position: fixed;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.4);
+		border: none;
+		padding: 0;
+		margin: 0;
+		cursor: pointer;
+		z-index: 40;
+	}
+
+	@media (max-width: 768px) {
+		.nav-menu-toggle {
+			display: inline-flex;
+		}
+
+		.manage-nav {
+			gap: var(--space-3);
+			padding: var(--space-3) var(--space-4);
+		}
+
+		.manage-nav .nav-link {
+			display: none;
+		}
+
+		.btn-signout {
+			padding: 5px;
+			width: 32px;
+			height: 32px;
+			justify-content: center;
+			gap: 0;
+		}
+
+		.btn-signout .btn-label {
+			display: none;
+		}
+
+		.sidebar {
+			position: fixed;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			width: min(280px, 82vw);
+			z-index: 50;
+			transform: translateX(-100%);
+			transition: transform var(--transition-fast);
+			box-shadow: 4px 0 16px rgba(0, 0, 0, 0.08);
+		}
+
+		.sidebar.is-open {
+			transform: translateX(0);
+		}
+
+		.sidebar-backdrop {
+			display: block;
+		}
+
+		.main-content {
+			padding: var(--space-4);
+		}
+
+		.main-header {
+			flex-direction: column;
+			align-items: stretch;
+			gap: var(--space-3);
+			padding: var(--space-3) var(--space-4);
+		}
+
+		.header-actions {
+			flex-wrap: wrap;
+			width: 100%;
+		}
+
+		.icon-action {
+			padding: 5px !important;
+			width: 32px;
+			height: 32px;
+			justify-content: center;
+			gap: 0;
+		}
+
+		.icon-action.with-label {
+			width: auto;
+			height: auto;
+			padding: 5px var(--space-3) !important;
+			gap: var(--space-2);
+		}
+
+		.icon-action .btn-label {
+			display: none;
+		}
+
+		.icon-action.with-label .btn-label {
+			display: inline;
+		}
+
+		.scan-menu {
+			padding: var(--space-3) var(--space-4);
+			justify-content: stretch;
+		}
+
+		.scan-menu .scan-btn {
+			flex: 1;
+			min-width: 0;
+			justify-content: center;
+			padding-left: var(--space-2) !important;
+			padding-right: var(--space-2) !important;
+		}
+
+		.stat-grid {
+			grid-template-columns: repeat(2, 1fr);
+			gap: var(--space-3);
+		}
+
+		.filter-bar {
+			flex-wrap: wrap;
+		}
+
+		.id-filter-wrap {
+			margin-left: 0;
+			flex-basis: 100%;
+			width: 100%;
+		}
+
+		.id-filter-input {
+			width: 100%;
+		}
+
+		.order-panel {
+			width: 100vw;
+			max-width: 100vw;
+			border-left: none;
+			box-shadow: none;
+		}
+
+		.panel-header {
+			padding: var(--space-3) var(--space-4);
+		}
+
+		.panel-section {
+			padding: var(--space-3) var(--space-4);
+		}
+
+		.panel-controls {
+			flex-wrap: wrap;
+			gap: var(--space-2);
+		}
+
+		.status-select {
+			flex-basis: 100%;
+			width: 100%;
+		}
+
+		.meta-grid {
+			grid-template-columns: 96px 1fr;
+		}
+	}
+
+	@media (max-width: 480px) {
+		.stat-grid {
+			grid-template-columns: 1fr;
+		}
 	}
 </style>

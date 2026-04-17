@@ -91,14 +91,14 @@
 					<p>Nowhere has no ability to alter or remove an artwork after it has been published. The artist's work is permanent and unmodifiable by any third party.</p>
 
 				{:else if activeModal === 'openSource'}
-					<p>Nowhere is fully open source. The codec, builder, and renderer are all publicly available for review, audit, and contribution.</p>
-					<p>You can verify that the code does exactly what it claims — no hidden tracking, no backdoors, no data collection.</p>
+					<p>Nowhere is fully open source. The codec that encodes forum settings into URLs, the builder that creates them, and the renderer that displays them are all publicly available for review and audit.</p>
+					<p>You can verify that encryption works as described, that no hidden data is collected, and that the code behaves exactly as claimed. The code is the contract.</p>
 
 				{:else if activeModal === 'privacy'}
 					<p>This artwork was never uploaded to a server. The artist encoded it directly into a link, and the content exists only inside the URL itself.</p>
 					<p>When you opened this page, nothing was fetched from a server. Your browser decoded the artwork entirely on your device. No request was made for this content because there is no content to request.</p>
-					<p>Nobody knows you are viewing this. There are no access logs, no analytics, no tracking pixels, and no IP addresses recorded. The same is true for every Nowhere page.</p>
-					<p>The link is the file. Viewing it leaves no trace.</p>
+					<p>Nobody can tell you are viewing this, because there is nothing to tell. Every Nowhere page loads from the same <code>/s</code> route, and the content lives in the URL fragment, which your browser keeps local and never sends across the network. Stores, forums, events, artworks all arrive the same way. The privacy is structural, not a policy.</p>
+					<p>The link is the file.</p>
 
 				{:else if activeModal === 'howToVerify'}
 					<p>1. <strong>Check the signing status.</strong> A signed artwork means the artist used a private key to prove authorship. An unsigned artwork has no cryptographic proof of origin.</p>

@@ -98,7 +98,7 @@
 		{/snippet}
 		<div class="modal-prose">
 			<p><strong>{data.name}</strong> is a fundraiser campaign created with Nowhere, a protocol that encodes content entirely inside the URL. No servers, databases, or intermediaries.</p>
-			<p>This campaign page was created by its author and encoded into a shareable link. No one can modify, censor, or take it down.</p>
+			<p>This campaign page was created by its author and encoded into a shareable link. No one can censor, or take it down.</p>
 		</div>
 	</FooterModal>
 
@@ -132,7 +132,7 @@
 		<div class="modal-prose">
 			<p>This campaign lives entirely in its URL. The link is the page. Share it anywhere and it will work instantly, with no account or app required.</p>
 			<p>Copy the full URL from your browser's address bar and send it via messaging apps, email, or social media. You can also use your browser's share button or generate a QR code from the link.</p>
-			<p>Every share is a direct copy of the campaign. It cannot be altered in transit.</p>
+			<p>Every share is a direct copy of the full campaign.</p>
 		</div>
 		<div class="share-actions">
 			{#if onshareqr}
@@ -224,7 +224,7 @@
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
 		{/snippet}
 		<div class="modal-prose">
-			<p>Nowhere is a protocol that encodes everything inside the URL, including stores, messages, and fundraisers. There are no servers, no databases, and no accounts. Your campaign is compressed and stored in the link itself.</p>
+			<p>Nowhere is a protocol that encodes everything inside the URL. There are no servers, no databases, and no accounts. Your campaign is compressed and stored in the link itself.</p>
 			<p>When someone opens your link, the page is rendered directly in their browser. Nothing is fetched from a server. Nothing can be censored or taken down.</p>
 		</div>
 	</FooterModal>
@@ -260,8 +260,8 @@
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
 		{/snippet}
 		<div class="modal-prose">
-			<p>Nowhere is fully open source. The codec, builder, and renderer are all publicly available for review, audit, and contribution.</p>
-			<p>You can verify that the code does exactly what it claims — no hidden tracking, no backdoors, no data collection.</p>
+			<p>Nowhere is fully open source. The codec that encodes forum settings into URLs, the builder that creates them, and the renderer that displays them are all publicly available for review and audit.</p>
+			<p>You can verify that encryption works as described, that no hidden data is collected, and that the code behaves exactly as claimed. The code is the contract.</p>
 		</div>
 	</FooterModal>
 
@@ -315,9 +315,11 @@
 			<p>Verification phrases are human-readable representations of cryptographic fingerprints. They make it easy to compare identities and detect tampering. Just compare the words.</p>
 			<p>All phrases are computed locally in your browser. No network requests, no relay queries, no privacy leaks.</p>
 		</div>
-		{#if authorPhrase}
+		{#if (signed && authorPhrase) || campaignPhrase}
 			<div style="margin-top: 1rem; padding: 0.75rem; background: var(--color-bg-secondary, #f5f5f5); border-radius: 8px; font-family: monospace; font-size: 0.8rem; word-break: break-all;">
-				<div style="margin-bottom: 0.5rem;"><strong>Creator:</strong> {authorPhrase}</div>
+				{#if signed && authorPhrase}
+					<div style="margin-bottom: 0.5rem;"><strong>Creator:</strong> {authorPhrase}</div>
+				{/if}
 				{#if campaignPhrase}
 					<div><strong>Campaign:</strong> {campaignPhrase}</div>
 				{/if}

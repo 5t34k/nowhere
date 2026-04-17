@@ -496,9 +496,9 @@
 		{/snippet}
 
 		<div class="modal-prose">
-			<p>Nowhere is an e-commerce protocol — not a platform. There are no servers, no databases, and no accounts. Every store is encoded directly into its URL - when you open a store link, your browser decodes and renders it locally.</p>
-			<p>Because stores live in their URLs, there is nothing to host and nothing to take down. No third party can censor, modify, or shut down a store. The seller controls everything - their products, prices, policies, and how they receive payments.</p>
-			<p>There are no platform fees, no middlemen, and no gatekeepers. Nowhere is built on open protocols and is completely free to use. Orders are encrypted so that only the seller can read them - no one else can see what you ordered or who you are.</p>
+			<p>Nowhere is an e-commerce protocol. There are no servers, no databases, and no accounts. Every store is encoded directly into its URL. When you open a store link, your browser decodes and renders it locally.</p>
+			<p>Because stores live in their URLs, there is nothing to host and nothing to take down. No third party can censor, modify, or shut down a store.</p>
+			<p>There are no platform fees, no middlemen, and no gatekeepers. Nowhere is built on open protocols and is completely free to use. Orders are encrypted so that only the seller can read them. No one else can see what you ordered or who you are.</p>
 			<p>Want to try it yourself? The store builder is free and easy to use. You can create and share your own store in minutes - <a href="/create/store" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary); text-decoration: underline;">start building your store</a>.</p>
 		</div>
 	</FooterModal>
@@ -790,7 +790,7 @@
 			</div>
 			<div class="step-item">
 				<div class="step-text">
-					<div class="detail-value">Keep your order ID</div>
+					<div class="detail-value">Keep your receipt order ID</div>
 					<div class="detail-label">Keep your order ID and any payment receipts. These are your reference for any communication with the seller.</div>
 				</div>
 			</div>
@@ -896,7 +896,7 @@
 
 		<div class="modal-prose" style="margin-bottom: var(--space-4);">
 			<p>Nowhere uses two types of verification phrases. The <strong>seller phrase</strong> is derived from the seller's public key and is the same across all their stores — use it to recognize a seller you've bought from before. The <strong>store phrase</strong> is derived from the store contents and confirms the URL hasn't been modified.</p>
-			<p>If the phrase a seller shares matches what you see here, you can trust the store is authentic. Phrases come in lengths from 3 to 12 words. Longer phrases are harder to forge.</p>
+			<p>If the phrase a seller shares matches what you see here, you can trust the store is authentic.</p>
 		</div>
 
 		{#if aboutData.sellerPhrase}

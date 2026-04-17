@@ -2,6 +2,10 @@
 	import type { ForumData, Tag } from '@nowhere/codec';
 	import FooterModal from '$lib/renderer/store/FooterModal.svelte';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
+	import QRCode from 'qrcode';
+
+	const LN_ADDRESS = 'zap@5t34k.com';
+	const SP_ADDRESS = 'sp1qqdz0n37nynjd0vgtu3mw9ed2lkvqxma8taxwueqlf59ps28tu0chuq4e8cnwww2earptym8sgap4zr7uhruzla7f9y2p06k5kn8xqcsj35zzuyjx';
 
 	interface CreatorProfile {
 		npubFull: string; npubTruncated: string; avatarSvg: string;
@@ -26,6 +30,10 @@
 
 	let activeModal = $state<string | null>(null);
 	let creatorNpubCopied = $state(false);
+	let copiedLn = $state(false);
+	let copiedSp = $state(false);
+	let lnQrDataUrl = $state('');
+	let spQrDataUrl = $state('');
 
 	async function copyCreatorNpub() {
 		try {
@@ -34,6 +42,30 @@
 			setTimeout(() => { creatorNpubCopied = false; }, 2000);
 		} catch {}
 	}
+
+	async function copyLn() {
+		try {
+			await navigator.clipboard.writeText(LN_ADDRESS);
+			copiedLn = true;
+			setTimeout(() => { copiedLn = false; }, 1500);
+		} catch {}
+	}
+
+	async function copySp() {
+		try {
+			await navigator.clipboard.writeText(SP_ADDRESS);
+			copiedSp = true;
+			setTimeout(() => { copiedSp = false; }, 1500);
+		} catch {}
+	}
+
+	$effect(() => {
+		if (activeModal === 'supportNowhere' && !spQrDataUrl) {
+			const qrOpts = { margin: 1, width: 360, color: { dark: '#1a1a1a', light: '#ffffff' } };
+			QRCode.toDataURL(`bitcoin:${SP_ADDRESS}`, qrOpts).then((url) => (spQrDataUrl = url)).catch(() => {});
+			QRCode.toDataURL(`lightning:${LN_ADDRESS}`, qrOpts).then((url) => (lnQrDataUrl = url)).catch(() => {});
+		}
+	});
 
 	function getTag(key: string): string {
 		return data.tags.find((t: Tag) => t.key === key)?.value ?? '';
@@ -239,7 +271,7 @@
 			<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
 		{/snippet}
 		<div class="ff-modal-prose">
-			<p>Nowhere is a protocol that encodes the configuration of every page (stores, fundraisers, petitions, messages, and forums) entirely inside the URL.</p>
+			<p>Nowhere is a protocol that encodes the configuration of every page entirely inside the URL.</p>
 			<p>For forums, Nowhere provides the structure and the encryption layer. The posts themselves live on Nostr relays, a decentralised network of storage nodes, but they are encrypted and unreadable to anyone without the link.</p>
 			<p>The result is a community space that no company owns, no authority can shut down, and no platform can deplatform.</p>
 		</div>
@@ -414,10 +446,33 @@
 		{/snippet}
 		<div class="ff-modal-prose">
 			<p>Nowhere is free to use, has no ads, and collects no data. Building and maintaining the protocol takes real work. If you have found value here, as a forum creator, a participant, or both, consider sending a small contribution.</p>
-			<p>Every amount helps and nothing is expected. The forum you are using will remain free regardless.</p>
-			<p>You can support Nowhere via Bitcoin Lightning. Send any amount to:</p>
-			<div class="ff-modal-phrase">
-				<span class="ff-modal-phrase-label">Lightning:</span> zap@5t34k.com
+
+			<div class="ff-support-grid">
+				<div class="ff-support-section">
+					<div class="ff-support-label">Silent Payment</div>
+					<button class="ff-support-address" onclick={copySp} title="copy address">
+						<span class="ff-support-address-text ff-support-sp">{SP_ADDRESS}</span>
+						<span class="ff-support-address-action">{copiedSp ? 'copied' : 'copy'}</span>
+					</button>
+					{#if spQrDataUrl}
+						<div class="ff-support-qr">
+							<img src={spQrDataUrl} alt="silent payment address qr code" />
+						</div>
+					{/if}
+				</div>
+
+				<div class="ff-support-section">
+					<div class="ff-support-label">Lightning</div>
+					<button class="ff-support-address" onclick={copyLn} title="copy address">
+						<span class="ff-support-address-text">{LN_ADDRESS}</span>
+						<span class="ff-support-address-action">{copiedLn ? 'copied' : 'copy'}</span>
+					</button>
+					{#if lnQrDataUrl}
+						<div class="ff-support-qr">
+							<img src={lnQrDataUrl} alt="lightning address qr code" />
+						</div>
+					{/if}
+				</div>
 			</div>
 		</div>
 	</FooterModal>
@@ -558,6 +613,103 @@
 		font-weight: 600;
 		margin-right: 0.25rem;
 		font-family: inherit;
+	}
+
+	/* ─── Support sections ─── */
+	.ff-support-grid {
+		margin-top: 1.25rem;
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto auto auto;
+		gap: 0.6rem 1.5rem;
+	}
+
+	.ff-support-section {
+		min-width: 0;
+		display: grid;
+		grid-template-rows: subgrid;
+		grid-row: span 3;
+		gap: 0.6rem;
+	}
+
+	.ff-support-label {
+		font-size: 0.6rem;
+		font-weight: 600;
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		color: var(--fm-text-muted);
+	}
+
+	.ff-support-address {
+		align-self: start;
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.75rem;
+		width: 100%;
+		padding: 0.75rem 0.85rem;
+		background: var(--color-bg-secondary);
+		border: 1px solid var(--fm-border);
+		border-radius: 6px;
+		cursor: pointer;
+		text-align: left;
+		font-family: inherit;
+		transition: border-color 0.15s;
+	}
+
+	.ff-support-address:hover {
+		border-color: var(--fm-border-strong, var(--fm-text-muted));
+	}
+
+	.ff-support-address-text {
+		font-family: monospace;
+		font-size: 0.8rem;
+		color: var(--color-text);
+		word-break: break-all;
+		line-height: 1.45;
+	}
+
+	.ff-support-sp {
+		font-size: 0.7rem;
+	}
+
+	.ff-support-address-action {
+		font-size: 0.625rem;
+		text-transform: uppercase;
+		letter-spacing: 0.12em;
+		color: var(--fm-text-muted);
+		flex-shrink: 0;
+	}
+
+	.ff-support-qr {
+		align-self: start;
+		justify-self: center;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0.65rem;
+		background: #ffffff;
+		border: 1px solid var(--fm-border);
+		border-radius: 6px;
+		width: 170px;
+	}
+
+	.ff-support-qr img {
+		display: block;
+		width: 100%;
+		height: auto;
+		image-rendering: pixelated;
+	}
+
+	@media (max-width: 640px) {
+		.ff-support-grid {
+			grid-template-columns: 1fr;
+		}
+
+		.ff-support-qr {
+			margin-left: auto;
+			margin-right: auto;
+		}
 	}
 
 	/* ─── Creator card ─── */
