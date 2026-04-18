@@ -23,7 +23,13 @@
 	import CopyHandle from './CopyHandle.svelte';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const accent = $derived(accentColor || '#D97706');
 	const allImages = [image, ...secondaryImages].filter(Boolean);
@@ -160,7 +166,7 @@
 				<span class="orn-glyph">✦</span>
 				<span class="orn-line"></span>
 			</div>
-			<p class="body-text">{body}</p>
+			<p class="body-text">{@html bodyHtml}</p>
 		{/if}
 
 		{#if lineup.length > 0}
@@ -185,7 +191,7 @@
 				<span class="orn-glyph">❧ &nbsp; Schedule &nbsp; ☙</span>
 				<span class="orn-line"></span>
 			</div>
-			<pre class="agenda-text">{agenda}</pre>
+			<pre class="agenda-text">{@html agendaHtml}</pre>
 		{/if}
 
 		{#if admissionDisplay || ageRestriction || dressCode || capacity}
@@ -323,7 +329,7 @@
 
 		<div class="p-middle">
 			{#if showBody}
-				<p class="p-body p-body-section">{body}</p>
+				<p class="p-body p-body-section">{@html bodyPlain}</p>
 			{/if}
 			{#if showLineup}
 				<div class="p-lineup p-lineup-section">
@@ -338,7 +344,7 @@
 			{#if showAgenda}
 				<div class="p-agenda-block p-agenda-section">
 					<div class="p-section-label">— Schedule —</div>
-					<pre class="p-agenda">{agenda}</pre>
+					<pre class="p-agenda">{@html agendaPlain}</pre>
 				</div>
 			{/if}
 			{#if admissionDisplay || ageRestriction || capacity}
@@ -600,6 +606,19 @@
 	color: #2c1a0e;
 	margin: 0;
 	white-space: pre-wrap;
+}
+
+.body-text :global(a),
+.agenda-text :global(a) {
+	color: var(--accent);
+	text-decoration: underline dotted;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+
+.body-text :global(a:hover),
+.agenda-text :global(a:hover) {
+	text-decoration-style: solid;
 }
 
 /* Lineup */

@@ -23,7 +23,13 @@
 	import SvgImage from '$lib/renderer/components/SvgImage.svelte';
 	import { svgToBackgroundUrl } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl, sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const accent = $derived(accentColor || '#00ff99');
 
@@ -166,11 +172,11 @@
 		<div class="content-section">
 			{#if body}
 				<div class="section-hdr">INFO</div>
-				<p class="body-text">{body}</p>
+				<p class="body-text">{@html bodyHtml}</p>
 			{/if}
 			{#if agenda}
 				<div class="section-hdr">SCHEDULE</div>
-				<pre class="body-text mono">{agenda}</pre>
+				<pre class="body-text mono">{@html agendaHtml}</pre>
 			{/if}
 		</div>
 	{/if}
@@ -317,13 +323,13 @@
 			{#if showBody}
 				<div class="p-info-block p-body-section" class:p-info-bordered={showLineup}>
 					<div class="p-sec-hdr">INFO</div>
-					<p class="p-body-text">{body}</p>
+					<p class="p-body-text">{@html bodyPlain}</p>
 				</div>
 			{/if}
 			{#if showAgenda}
 				<div class="p-info-block p-agenda-section" class:p-info-bordered={showLineup || showBody}>
 					<div class="p-sec-hdr">SCHEDULE</div>
-					<pre class="p-body-text p-mono">{agenda}</pre>
+					<pre class="p-body-text p-mono">{@html agendaPlain}</pre>
 				</div>
 			{/if}
 		</div>
@@ -570,6 +576,18 @@
 }
 
 .mono { font-family: 'Courier New', monospace; }
+
+.body-text :global(a) {
+	color: var(--accent);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	word-break: break-word;
+}
+
+.body-text :global(a:hover) {
+	text-shadow: 0 0 8px color-mix(in srgb, var(--accent) 60%, transparent);
+}
 
 .cell-link {
 	color: var(--accent);

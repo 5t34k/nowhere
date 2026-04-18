@@ -23,7 +23,13 @@
 	import CopyHandle from './CopyHandle.svelte';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const accent = $derived(accentColor || '#dc2626');
 	const isSvgImage = $derived(image?.startsWith('<'));
@@ -121,7 +127,7 @@
 
 		{#if body}
 			<div class="divider-thin"></div>
-			<p class="body-text">{body}</p>
+			<p class="body-text">{@html bodyHtml}</p>
 		{/if}
 
 		{#if lineup.length > 0}
@@ -141,7 +147,7 @@
 			<div class="divider-thin"></div>
 			<div class="agenda-block">
 				<span class="section-label">SCHEDULE</span>
-				<pre class="agenda-text">{agenda}</pre>
+				<pre class="agenda-text">{@html agendaHtml}</pre>
 			</div>
 		{/if}
 
@@ -283,7 +289,7 @@
 					<p class="p-description">{description}</p>
 				{/if}
 				{#if body}
-					<p class="p-body">{body}</p>
+					<p class="p-body">{@html bodyPlain}</p>
 				{/if}
 			</div>
 			{/if}
@@ -304,7 +310,7 @@
 				{#if showAgenda}
 					<div class="p-agenda-block p-agenda-section">
 						<span class="p-section-label">SCHEDULE</span>
-						<pre class="p-agenda-text">{agenda}</pre>
+						<pre class="p-agenda-text">{@html agendaPlain}</pre>
 					</div>
 				{/if}
 			</div>
@@ -449,10 +455,10 @@
 }
 
 .image-main {
-	width: 100%;
+	max-width: 100%;
 	max-height: 500px;
-	object-fit: cover;
 	display: block;
+	margin: 0 auto;
 	transition: opacity 0.15s;
 }
 
@@ -483,6 +489,20 @@
 	color: #222;
 	margin: 0;
 	white-space: pre-wrap;
+}
+
+.body-text :global(a),
+.agenda-text :global(a) {
+	color: var(--accent);
+	font-weight: 700;
+	text-decoration: underline;
+	text-decoration-thickness: 2px;
+	text-underline-offset: 2px;
+}
+
+.body-text :global(a:hover),
+.agenda-text :global(a:hover) {
+	background: color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
 /* ── Section label: NOT accent ── */

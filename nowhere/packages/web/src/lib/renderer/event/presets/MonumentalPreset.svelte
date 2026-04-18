@@ -24,7 +24,13 @@
 	import SvgImage from '$lib/renderer/components/SvgImage.svelte';
 	import { svgToBackgroundUrl } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl, sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const accent = $derived(accentColor || '#F59E0B');
 
@@ -105,7 +111,7 @@
 
 			{#if body}
 				<div class="d-block">
-					<p class="body-text">{body}</p>
+					<p class="body-text">{@html bodyHtml}</p>
 				</div>
 			{/if}
 
@@ -126,7 +132,7 @@
 			{#if agenda}
 				<div class="d-block">
 					<h2 class="d-label">Schedule</h2>
-					<pre class="agenda-text">{agenda}</pre>
+					<pre class="agenda-text">{@html agendaHtml}</pre>
 				</div>
 			{/if}
 
@@ -477,6 +483,19 @@
 	color: rgba(255, 255, 255, 0.7);
 	margin: 0;
 	white-space: pre-wrap;
+}
+
+.body-text :global(a),
+.agenda-text :global(a) {
+	color: var(--accent);
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.body-text :global(a:hover),
+.agenda-text :global(a:hover) {
+	text-decoration: underline;
+	text-underline-offset: 3px;
 }
 
 /* Lineup */

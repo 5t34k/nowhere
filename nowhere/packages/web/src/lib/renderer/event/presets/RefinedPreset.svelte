@@ -23,7 +23,13 @@
 	import CopyHandle from './CopyHandle.svelte';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const accent = $derived(accentColor || '#1B4F72');
 	const allImages = [image, ...secondaryImages].filter(Boolean);
@@ -157,7 +163,7 @@
 
 		{#if body}
 			<div class="body-section">
-				<p class="body-text">{body}</p>
+				<p class="body-text">{@html bodyHtml}</p>
 			</div>
 		{/if}
 
@@ -178,7 +184,7 @@
 		{#if agenda}
 			<section class="section">
 				<h2 class="section-label">Schedule</h2>
-				<pre class="agenda-text">{agenda}</pre>
+				<pre class="agenda-text">{@html agendaHtml}</pre>
 			</section>
 		{/if}
 
@@ -287,7 +293,7 @@
 
 		<div class="p-middle">
 			{#if showBody}
-				<p class="p-body p-body-section">{body}</p>
+				<p class="p-body p-body-section">{@html bodyPlain}</p>
 			{/if}
 			{#if showLineup}
 				<div class="p-section p-lineup-section">
@@ -303,7 +309,7 @@
 			{#if showAgenda}
 				<div class="p-section p-agenda-section">
 					<span class="p-label">Schedule</span>
-					<pre class="p-agenda">{agenda}</pre>
+					<pre class="p-agenda">{@html agendaPlain}</pre>
 				</div>
 			{/if}
 		</div>
@@ -529,6 +535,19 @@
 	color: #333;
 	margin: 0;
 	white-space: pre-wrap;
+}
+
+.body-text :global(a),
+.agenda-text :global(a) {
+	color: var(--accent);
+	text-decoration: none;
+	border-bottom: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+	transition: border-color 0.2s ease;
+}
+
+.body-text :global(a:hover),
+.agenda-text :global(a:hover) {
+	border-bottom-color: var(--accent);
 }
 
 /* Sections — labeled with tiny tracked caps */

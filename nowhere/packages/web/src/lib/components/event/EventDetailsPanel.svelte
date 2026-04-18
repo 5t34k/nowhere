@@ -120,7 +120,7 @@
 
 	<section class="field-group">
 		<label for="ev-body">
-			Description			<HintIcon tip="Full details about the event. Shown as the main body of the event page." />
+			Description			<HintIcon tip="Full details about the event. Shown as the main body of the event page. Links supported: [label](https://example.com)" />
 		</label>
 		<textarea
 			id="ev-body"
@@ -223,7 +223,7 @@
 
 	<section class="field-group">
 		<label for="ev-agenda">
-			Schedule / Agenda			<HintIcon tip="Running order or timetable. Freeform text." />
+			Schedule / Agenda			<HintIcon tip="Running order or timetable. Freeform text. Links supported: [label](https://example.com)" />
 		</label>
 		<textarea
 			id="ev-agenda"

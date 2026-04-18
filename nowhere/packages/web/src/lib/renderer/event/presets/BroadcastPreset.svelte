@@ -23,7 +23,13 @@
 	import CopyHandle from './CopyHandle.svelte';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const accent = $derived(accentColor || '#E5001C');
 	const isSvgImage = $derived(image?.startsWith('<'));
@@ -191,7 +197,7 @@
 	<!-- Body -->
 	{#if body}
 		<div class="body-section">
-			<p class="body-text">{body}</p>
+			<p class="body-text">{@html bodyHtml}</p>
 		</div>
 	{/if}
 
@@ -199,7 +205,7 @@
 	{#if agenda}
 		<div class="body-section">
 			<div class="body-label">SCHEDULE</div>
-			<pre class="agenda-text">{agenda}</pre>
+			<pre class="agenda-text">{@html agendaHtml}</pre>
 		</div>
 	{/if}
 
@@ -595,6 +601,19 @@
 	color: color-mix(in srgb, var(--text) 82%, transparent);
 	margin: 0;
 	white-space: pre-wrap;
+}
+
+.body-text :global(a),
+.agenda-text :global(a) {
+	color: #fff;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+}
+
+.body-text :global(a:hover),
+.agenda-text :global(a:hover) {
+	text-decoration-thickness: 2px;
 }
 
 .agenda-text {

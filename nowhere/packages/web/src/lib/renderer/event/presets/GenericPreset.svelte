@@ -24,7 +24,13 @@
 	import CopyHandle from './CopyHandle.svelte';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { renderLinksOnly, stripLinks } from '$lib/renderer/utils/link-markdown.js';
 	import { fitText } from './fitText.js';
+
+	const bodyHtml = $derived(renderLinksOnly(body));
+	const agendaHtml = $derived(renderLinksOnly(agenda));
+	const bodyPlain = $derived(stripLinks(body));
+	const agendaPlain = $derived(stripLinks(agenda));
 
 	const isSvgImage = $derived(image?.startsWith('<'));
 	const sanitizedSvg = $derived.by(() => isSvgImage ? sanitizeSvg(image) : '');
@@ -94,6 +100,8 @@
 	<div class="container">
 		<div class="layout">
 
+			<div class="main-column">
+
 			<!-- Left top: title block -->
 			<header class="main-header">
 				<h1 class="name" use:fitText>{name}</h1>
@@ -106,6 +114,92 @@
 				</div>
 			{/if}
 			</header>
+
+			<!-- Left bottom: main body content -->
+			<div class="main-content">
+				{#if body}
+					<section class="section">
+						<h2 class="section-label">About this event</h2>
+						<p class="body-text">{@html bodyHtml}</p>
+					</section>
+				{/if}
+
+				{#if lineup.length > 0}
+					<section class="section">
+						<h2 class="section-label">Lineup</h2>
+						<ul class="lineup">
+							{#each lineup as act}
+								<li class="lineup-item">
+									<span class="act-name">{act.name}</span>
+									{#if act.role}<span class="act-role">{act.role}</span>{/if}
+								</li>
+							{/each}
+						</ul>
+					</section>
+				{/if}
+
+				{#if agenda}
+					<section class="section">
+						<h2 class="section-label">Schedule</h2>
+						<pre class="agenda">{@html agendaHtml}</pre>
+					</section>
+				{/if}
+
+				{#if capacity || ageRestriction || dressCode}
+					<section class="section">
+						<h2 class="section-label">Details</h2>
+						<div class="chips">
+							{#if capacity}
+								<div class="chip">
+									<span class="chip-label">Capacity</span>
+									<span class="chip-value">{capacity}</span>
+								</div>
+							{/if}
+							{#if ageRestriction}
+								<div class="chip">
+									<span class="chip-label">Age</span>
+									<span class="chip-value">{ageRestriction}</span>
+								</div>
+							{/if}
+							{#if dressCode}
+								<div class="chip">
+									<span class="chip-label">Dress code</span>
+									<span class="chip-value">{dressCode}</span>
+								</div>
+							{/if}
+						</div>
+					</section>
+				{/if}
+
+				{#if secondaryImages.length > 0}
+					<section class="section">
+						<h2 class="section-label">Gallery</h2>
+						<div class="gallery">
+							{#each secondaryImages as src, i}
+								<button class="lb-trigger" onclick={() => openLightbox(image ? i + 1 : i)} aria-label="View image {i + 1}">
+									<img {src} alt="Event photo {i + 1}" class="gallery-img" />
+								</button>
+							{/each}
+						</div>
+					</section>
+				{/if}
+
+				{#if contacts.length > 0}
+					<section class="section">
+						<h2 class="section-label">Contact</h2>
+						<div class="contacts">
+							{#each contacts as c}
+								<div class="contact-row">
+									<span class="contact-platform">{c.name}</span>
+									<span class="contact-handle"><CopyHandle text={c.handle} /></span>
+								</div>
+							{/each}
+						</div>
+					</section>
+				{/if}
+			</div>
+
+			</div>
 
 			<!-- Right: sidebar (image → info → RSVP) -->
 			<aside class="sidebar">
@@ -194,90 +288,6 @@
 				{/if}
 			</aside>
 
-			<!-- Left bottom: main body content -->
-			<div class="main-content">
-				{#if body}
-					<section class="section">
-						<h2 class="section-label">About this event</h2>
-						<p class="body-text">{body}</p>
-					</section>
-				{/if}
-
-				{#if lineup.length > 0}
-					<section class="section">
-						<h2 class="section-label">Lineup</h2>
-						<ul class="lineup">
-							{#each lineup as act}
-								<li class="lineup-item">
-									<span class="act-name">{act.name}</span>
-									{#if act.role}<span class="act-role">{act.role}</span>{/if}
-								</li>
-							{/each}
-						</ul>
-					</section>
-				{/if}
-
-				{#if agenda}
-					<section class="section">
-						<h2 class="section-label">Schedule</h2>
-						<pre class="agenda">{agenda}</pre>
-					</section>
-				{/if}
-
-				{#if capacity || ageRestriction || dressCode}
-					<section class="section">
-						<h2 class="section-label">Details</h2>
-						<div class="chips">
-							{#if capacity}
-								<div class="chip">
-									<span class="chip-label">Capacity</span>
-									<span class="chip-value">{capacity}</span>
-								</div>
-							{/if}
-							{#if ageRestriction}
-								<div class="chip">
-									<span class="chip-label">Age</span>
-									<span class="chip-value">{ageRestriction}</span>
-								</div>
-							{/if}
-							{#if dressCode}
-								<div class="chip">
-									<span class="chip-label">Dress code</span>
-									<span class="chip-value">{dressCode}</span>
-								</div>
-							{/if}
-						</div>
-					</section>
-				{/if}
-
-				{#if secondaryImages.length > 0}
-					<section class="section">
-						<h2 class="section-label">Gallery</h2>
-						<div class="gallery">
-							{#each secondaryImages as src, i}
-								<button class="lb-trigger" onclick={() => openLightbox(image ? i + 1 : i)} aria-label="View image {i + 1}">
-									<img {src} alt="Event photo {i + 1}" class="gallery-img" />
-								</button>
-							{/each}
-						</div>
-					</section>
-				{/if}
-
-				{#if contacts.length > 0}
-					<section class="section">
-						<h2 class="section-label">Contact</h2>
-						<div class="contacts">
-							{#each contacts as c}
-								<div class="contact-row">
-									<span class="contact-platform">{c.name}</span>
-									<span class="contact-handle"><CopyHandle text={c.handle} /></span>
-								</div>
-							{/each}
-						</div>
-					</section>
-				{/if}
-			</div>
-
 		</div>
 	</div>
 
@@ -345,7 +355,7 @@
 			{#if showBody}
 				<div class="p-section p-body-section">
 					<h2 class="p-section-label">About</h2>
-					<p class="p-body">{body}</p>
+					<p class="p-body">{@html bodyPlain}</p>
 				</div>
 			{/if}
 			{#if showLineup}
@@ -364,7 +374,7 @@
 			{#if showAgenda}
 				<div class="p-section p-agenda-section">
 					<h2 class="p-section-label">Schedule</h2>
-					<pre class="p-agenda">{agenda}</pre>
+					<pre class="p-agenda">{@html agendaPlain}</pre>
 				</div>
 			{/if}
 		</div>
@@ -447,20 +457,21 @@
 	.layout {
 		display: grid;
 		grid-template-columns: minmax(0, 1fr) 320px;
-		grid-template-areas:
-			"header  sidebar"
-			"content sidebar";
 		column-gap: 3rem;
 		align-items: start;
 	}
 
+	.main-column {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
 	.main-header {
-		grid-area: header;
 		padding-bottom: 2rem;
 	}
 
 	.sidebar {
-		grid-area: sidebar;
 		position: sticky;
 		top: 1.5rem;
 		display: flex;
@@ -468,25 +479,24 @@
 		gap: 1rem;
 	}
 
-	.main-content {
-		grid-area: content;
-	}
-
 	/* Mobile: single column, sidebar between header and content */
 	@media (max-width: 700px) {
 		.layout {
 			grid-template-columns: minmax(0, 1fr);
-			grid-template-areas:
-				"header"
-				"sidebar"
-				"content";
+		}
+		.main-column {
+			display: contents;
+		}
+		.main-header {
+			order: 1;
 		}
 		.sidebar {
+			order: 2;
 			position: static;
 			min-width: 0;
 		}
-		.main-header,
 		.main-content {
+			order: 3;
 			min-width: 0;
 		}
 	}
@@ -549,12 +559,17 @@
 		background: #f4f4f4;
 		cursor: pointer;
 	}
-	.hero img, .hero .svg-inline {
+	.hero img {
 		width: 100%;
-		aspect-ratio: 16 / 10;
+		max-height: 300px;
 		object-fit: cover;
+		object-position: 50% 30%;
 		display: block;
 		transition: opacity 0.15s;
+	}
+	.hero .svg-inline {
+		width: 100%;
+		display: block;
 		overflow: hidden;
 	}
 
@@ -688,6 +703,19 @@
 		margin: 0;
 		white-space: pre-wrap;
 		overflow-wrap: break-word;
+	}
+
+	.body-text :global(a),
+	.agenda :global(a) {
+		color: var(--accent);
+		text-decoration: none;
+		border-bottom: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+		transition: border-color 0.15s ease;
+	}
+
+	.body-text :global(a:hover),
+	.agenda :global(a:hover) {
+		border-bottom-color: var(--accent);
 	}
 
 	/* Lineup */
