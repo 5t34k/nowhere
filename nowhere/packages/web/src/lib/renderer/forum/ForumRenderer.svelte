@@ -1011,7 +1011,7 @@
 	});
 
 	// ─── Voice chat ───
-	const voiceEnabled = $derived(!!data?.tags?.some((t: Tag) => t.key === 'V' && t.value === undefined));
+	const voiceEnabled = $derived(false && !!data?.tags?.some((t: Tag) => t.key === 'V' && t.value === undefined));
 
 	let activeMesh = $state<VoiceMesh | null>(null);
 	let activeVoiceChannel = $state('');
