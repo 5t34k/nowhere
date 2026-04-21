@@ -10,7 +10,7 @@
 		storeRooms
 	} from '$lib/renderer/nostr/forum-chat.js';
 	import { deriveRoomKeypair } from '$lib/nostr/forum-keys.js';
-	import { computeFingerprintFromString, computeVerificationPhrase } from '@nowhere/codec';
+	import { computeSellerFingerprint, computeVerificationPhrase } from '@nowhere/codec';
 	import { npubEncode } from 'nostr-tools/nip19';
 	import { fetchEvent, fetchProfile } from '$lib/renderer/nostr/relay-pool.js';
 	import type { ForumCache } from '$lib/renderer/nostr/forum-cache.js';
@@ -137,7 +137,7 @@
 		}
 
 		try {
-			const fp = await computeFingerprintFromString(pubkey);
+			const fp = await computeSellerFingerprint(pubkey);
 			profileCardData.phrase = computeVerificationPhrase(fp, 6);
 		} catch {}
 

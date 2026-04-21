@@ -7,7 +7,7 @@
 </script>
 
 <script lang="ts">
-	import { computeFingerprintFromString, computeVerificationPhrase } from '@nowhere/codec';
+	import { computeSellerFingerprint, computeVerificationPhrase } from '@nowhere/codec';
 	import { npubEncode } from 'nostr-tools/nip19';
 	import { fetchProfile } from '$lib/renderer/nostr/relay-pool.js';
 	import type { ForumCache } from '$lib/renderer/nostr/forum-cache.js';
@@ -66,7 +66,7 @@
 	// Compute 6-word verification phrase from pubkey
 	$effect(() => {
 		if (!pubkey) return;
-		computeFingerprintFromString(pubkey).then(fp => {
+		computeSellerFingerprint(pubkey).then(fp => {
 			userPhrase = computeVerificationPhrase(fp, 6);
 		}).catch(() => {});
 	});
