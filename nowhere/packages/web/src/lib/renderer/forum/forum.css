@@ -1,5 +1,21 @@
 /* ─── Forum Renderer — Redesign ─── */
 
+.forum-page .thread-op-text a,
+.forum-page .reply-text a,
+.forum-page .reply-quote-body a,
+.forum-page .chat-msg-body a {
+	color: var(--fm-link);
+	text-decoration: underline;
+	word-break: break-all;
+	overflow-wrap: anywhere;
+}
+.forum-page .thread-op-text a:hover,
+.forum-page .reply-text a:hover,
+.forum-page .reply-quote-body a:hover,
+.forum-page .chat-msg-body a:hover {
+	color: var(--fm-link-hover);
+}
+
 .forum-page {
 	--fm-bg: #FAFAF7;
 	--fm-text: #1A1A1A;

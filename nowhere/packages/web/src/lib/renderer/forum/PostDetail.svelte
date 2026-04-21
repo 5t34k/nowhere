@@ -2,6 +2,7 @@
 	import type { DecryptedPost, DecryptedReply } from '$lib/renderer/nostr/forum-events.js';
 	import type { ForumCache } from '$lib/renderer/nostr/forum-cache.js';
 	import AuthorIdentity from './AuthorIdentity.svelte';
+	import Linkified from './Linkified.svelte';
 	import ReplyForm from './ReplyForm.svelte';
 	import { sanitizeUrl, sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
 
@@ -101,7 +102,7 @@
 		{/if}
 		<h2 class="thread-op-title">{post.payload.t}</h2>
 		{#if post.payload.b}
-			<div class="thread-op-text">{post.payload.b}</div>
+			<div class="thread-op-text"><Linkified text={post.payload.b} /></div>
 		{/if}
 		{#if post.payload.l}
 			<div class="thread-op-link-row">
@@ -152,7 +153,7 @@
 									<button class="reply-quote-jump" onclick={() => jumpToReply(quoted.eventId)}>↑ Jump</button>
 								</div>
 								<div class="reply-quote-body" class:expanded={expandedQuotes.has(reply.eventId)}>
-									{quoted.payload.b}
+									<Linkified text={quoted.payload.b} />
 								</div>
 								{#if isLongQuote(quoted.payload.b)}
 									<button class="reply-quote-toggle" onclick={() => toggleQuoteExpand(reply.eventId)}>
@@ -164,7 +165,7 @@
 							<div class="reply-quote reply-quote-missing">Replying to an earlier message</div>
 						{/if}
 					{/if}
-					<div class="reply-text">{reply.payload.b}</div>
+					<div class="reply-text"><Linkified text={reply.payload.b} /></div>
 					<div class="reply-action-row">
 						<span class="reply-time">{formatTime(reply.payload.ts)}</span>
 						{#if canPost && !wotBlocked}

@@ -15,6 +15,7 @@
 	import { fetchEvent, fetchProfile } from '$lib/renderer/nostr/relay-pool.js';
 	import type { ForumCache } from '$lib/renderer/nostr/forum-cache.js';
 	import AuthorIdentity from './AuthorIdentity.svelte';
+	import Linkified from './Linkified.svelte';
 	import { sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { verifyJoinSignature } from '$lib/renderer/nostr/forum-voice.js';
@@ -860,7 +861,7 @@
 											</button>
 											<span class="chat-msg-time">{formatTime(msg.payload.ts)}</span>
 										</div>
-										<div class="chat-msg-body">{msg.payload.b}</div>
+										<div class="chat-msg-body"><Linkified text={msg.payload.b} /></div>
 									</div>
 								</div>
 							{/if}

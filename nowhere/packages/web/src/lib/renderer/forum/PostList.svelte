@@ -256,7 +256,7 @@
 				{/if}
 				<div class="post-row-footer">
 					<span class="post-row-phrase">
-						<AuthorIdentity pubkey={post.payload.p} {privacyMode} showAvatar={false} showNpub={false} {profileRelays} {forumCache} {onOpenProfileCard} />
+						<AuthorIdentity pubkey={post.payload.p} {privacyMode} showAvatar={false} showNpub={false} {profileRelays} {forumCache} />
 					</span>
 					<span class="post-row-time">{formatTime(post.payload.ts)}</span>
 					<span class="post-row-replies">{(replyCountMap[post.eventId] ?? 0) === 1 ? '1 reply' : (replyCountMap[post.eventId] ?? 0) + ' replies'}</span>
