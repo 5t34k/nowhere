@@ -300,7 +300,7 @@
 					Orders travel through public relays. Relays have not promised to store orders. An order a buyer pays you for may never reach you, and there is no way to recover it unless the buyer directly provides you with their receipt.
 				</p>
 				<p>
-					An order showing in the manage portal is not proof of anything. There is no way to know that the order is real or that their payment has actually been sent, and you will need to verify both yourself before you ship.
+					An order showing in the manage portal is not proof of anything. <strong>There is no way to know that the order is real or that their payment has actually been sent, and you will need to verify both yourself before you ship.</strong>
 				</p>
 				<p>
 					There is no dispute system and no refunds path. If something goes wrong between you and a buyer there is no company behind Nowhere to escalate to.
@@ -309,7 +309,7 @@
 					Nothing here has been proven under real load or against real adversaries. Testing is not the same as production, and we do not yet know what may break.
 				</p>
 				<p>
-					We do want people to test Nowhere stores with real orders. That is how the system gets proven. If you publish, start with small orders and low-value items. Make sure your contact details are provided so buyers can reach you outside nowhere if their order does not come through or there are any issues.
+					We do want people to test Nowhere stores with real orders. That is how the system gets proven. If you publish,<strong> start with small orders and low-value items.</strong> Make sure your contact details are provided so buyers can reach you outside nowhere if their order does not come through or there are any issues.
 				</p>
 			</div>
 			<div class="beta-notice-actions">

@@ -45,7 +45,7 @@ function defaultState(): BuilderState {
 		image: '',
 		paymentMethods: defaultPaymentMethods(),
 		customPaymentMethods: [],
-		tags: [],
+		tags: [{ key: 'k', value: '1' }],
 		items: [defaultItem()]
 	};
 }

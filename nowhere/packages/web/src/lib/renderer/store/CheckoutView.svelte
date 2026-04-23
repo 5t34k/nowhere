@@ -18,7 +18,7 @@
 	let { store, currency, onBack, onSubmit, lowSettings = null, stockLevels = {} }: Props = $props();
 
 	let buyerCountry = $state('');
-	let showNotice = $state(true);
+	let noticeStep = $state(1);
 	const discount = $derived(computeDiscount($cart, store.tags));
 	const shipping = $derived(computeShipping($cart, store.tags, buyerCountry || undefined));
 	const total = $derived($cartSubtotal - discount.amount + shipping);
@@ -143,7 +143,7 @@
 	</div>
 </div>
 
-{#if showNotice}
+{#if noticeStep === 1}
 	<div class="buyer-notice-overlay" role="dialog" aria-modal="true" aria-label="Before you pay">
 		<div class="buyer-notice-dialog">
 			<div class="buyer-notice-header">
@@ -162,7 +162,33 @@
 				</p>
 			</div>
 			<div class="buyer-notice-actions">
-				<button class="buyer-notice-btn" onclick={() => (showNotice = false)}>I understand, continue</button>
+				<button class="buyer-notice-btn" onclick={() => (noticeStep = 2)}>I understand, continue</button>
+			</div>
+		</div>
+	</div>
+{:else if noticeStep === 2}
+	<div class="buyer-notice-overlay" role="dialog" aria-modal="true" aria-label="Are you sure">
+		<div class="buyer-notice-dialog">
+			<div class="buyer-notice-header">
+				<div class="buyer-notice-eyebrow buyer-notice-eyebrow-danger">Nowhere · Beta</div>
+				<h2 class="buyer-notice-title">Are you sure</h2>
+			</div>
+			<div class="buyer-notice-body">
+				<p class="buyer-notice-lede">
+					Nowhere store is in beta. Use only with small amounts and for testing.
+				</p>
+				<p>
+					<strong>Only spend what you can afford to lose.</strong> Treat every order as if the money may not come back.
+				</p>
+				<p>
+					<strong>Only shop from sellers you trust.</strong> There is no platform standing behind the seller and no dispute system to fall back on.
+				</p>
+				<p>
+					<strong>Download your receipt after paying.</strong> It is the only proof you will have if you need to follow up with the seller.
+				</p>
+			</div>
+			<div class="buyer-notice-actions">
+				<button class="buyer-notice-btn buyer-notice-btn-danger" onclick={() => (noticeStep = 0)}>I understand, continue</button>
 			</div>
 		</div>
 	</div>
@@ -302,6 +328,22 @@
 	.buyer-notice-btn:focus-visible {
 		outline: 2px solid #000000;
 		outline-offset: 2px;
+	}
+
+	.buyer-notice-btn-danger {
+		background: #c8102e;
+	}
+
+	.buyer-notice-btn-danger:hover {
+		background: #a60e27;
+	}
+
+	.buyer-notice-btn-danger:focus-visible {
+		outline-color: #c8102e;
+	}
+
+	.buyer-notice-eyebrow-danger {
+		color: #c8102e;
 	}
 
 	@media (max-width: 560px) {

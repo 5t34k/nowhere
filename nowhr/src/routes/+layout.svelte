@@ -2,9 +2,21 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import { browser } from '$app/environment';
-	import { setContext } from 'svelte';
+	import { onMount, setContext } from 'svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
+		let reloading = false;
+		const onChange = () => {
+			if (reloading) return;
+			reloading = true;
+			location.reload();
+		};
+		navigator.serviceWorker.addEventListener('controllerchange', onChange);
+		return () => navigator.serviceWorker.removeEventListener('controllerchange', onChange);
+	});
 
 	const isStandalone = browser && (
 		window.matchMedia('(display-mode: standalone)').matches ||

@@ -328,6 +328,13 @@
 			</div>
 		{/if}
 
+		{#if siteType === 'store' && inventoryConfigured}
+			<div class="inventory-tip">
+				<strong>Next step: publish an inventory event</strong>
+				<p>Your store expects live stock data. Until you publish an inventory event, buyers opening your link cannot check out. Go to <a href="https://hostednowhere.com/manage/store" target="_blank" rel="noopener">hostednowhere.com/manage/store</a> to publish one. You can also close the store from there at any time.</p>
+			</div>
+		{/if}
+
 		{#if warningAcknowledged || (siteType !== 'store' && siteType !== 'forum' && siteType !== 'petition')}
 		<div class="encrypt-section">
 			<button type="button" class="encrypt-toggle" onclick={() => onEncryptToggle(!encryptEnabled)}>
@@ -686,6 +693,38 @@
 
 	.inventory-warning-link:hover {
 		color: #78350f;
+	}
+
+	.inventory-tip {
+		padding: var(--space-3) var(--space-4);
+		background: rgba(59, 130, 246, 0.08);
+		border: 1px solid rgba(59, 130, 246, 0.35);
+		border-radius: var(--radius-md);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1);
+	}
+
+	.inventory-tip strong {
+		font-size: var(--text-sm);
+		font-weight: 600;
+		color: #1e40af;
+	}
+
+	.inventory-tip p {
+		font-size: var(--text-xs);
+		color: #1e3a8a;
+		line-height: 1.5;
+	}
+
+	.inventory-tip a {
+		color: #1e40af;
+		font-weight: 600;
+		text-decoration: underline;
+	}
+
+	.inventory-tip a:hover {
+		color: #1e3a8a;
 	}
 
 	.not-ready {

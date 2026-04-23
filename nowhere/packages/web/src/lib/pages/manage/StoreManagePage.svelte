@@ -1883,6 +1883,15 @@ import ManageNav from './ManageNav.svelte';
 
 				<!-- ══════════════════════ ORDERS ═════════════════════════════ -->
 				{:else if activeTab === 'orders'}
+					<div class="orders-payment-warning" role="alert">
+						<div class="orders-payment-warning-title">Orders are not proof of payment</div>
+						<p>
+							Orders shown here may not correspond to real payments. Orders can be submitted without payment being sent.
+						</p>
+						<p>
+							<strong>Always check your wallet for a payment matching the order ID before you ship anything.</strong>
+						</p>
+					</div>
 					{#if syncError}
 						<div class="alert alert-error">{syncError}</div>
 					{/if}
@@ -3980,6 +3989,34 @@ Order 9f1a3c5e7b2d4f6  ·  12,800 sats"
 		background: rgba(220, 38, 38, 0.06);
 		border-color: rgba(220, 38, 38, 0.2);
 		color: var(--color-error);
+	}
+
+	.orders-payment-warning {
+		background: rgba(200, 16, 46, 0.06);
+		border: 2px solid #c8102e;
+		border-radius: var(--radius-sm);
+		padding: var(--space-4) var(--space-5);
+		margin-bottom: var(--space-5);
+		color: #1a1a1a;
+	}
+
+	.orders-payment-warning-title {
+		font-size: var(--text-lg);
+		font-weight: 700;
+		color: #c8102e;
+		margin-bottom: var(--space-2);
+		text-transform: uppercase;
+		letter-spacing: 0.03em;
+	}
+
+	.orders-payment-warning p {
+		margin: 0 0 var(--space-2);
+		font-size: var(--text-sm);
+		line-height: 1.5;
+	}
+
+	.orders-payment-warning p:last-child {
+		margin-bottom: 0;
 	}
 
 	.alert-info {
