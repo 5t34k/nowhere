@@ -7,7 +7,7 @@ Nowhere encodes an entire website into a URL fragment. The site lives in the lin
 
 **[hostednowhere.com](https://hostednowhere.com)**
 
-**Status:** Nowhere is early software and still evolving. There may be bugs in any tool. Store carries the most risk because it handles real money and depends on Nostr relays that may not retain orders, so test the full flow including order retrieval before using it for real business.
+**Status:** Nowhere is early software and still evolving. There may be bugs in any tool. Store carries the most risk because it handles real money and depends on Nostr relays that may not retain orders, so test the full flow including order retrieval and consider only using for testing and with small amounts.
 
 ## How it works
 
