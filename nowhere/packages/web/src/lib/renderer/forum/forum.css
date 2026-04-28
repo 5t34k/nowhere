@@ -2496,6 +2496,45 @@
 	image-rendering: pixelated;
 }
 
+.forum-share-qr-fallback {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	text-align: center;
+	padding: 18px;
+	box-sizing: border-box;
+	border: 1px dashed var(--fm-border);
+	background: var(--fm-bg-alt, rgba(0, 0, 0, 0.02));
+	image-rendering: auto;
+}
+
+.forum-share-qr-fallback-icon {
+	color: var(--fm-text-muted);
+	margin-bottom: 14px;
+	opacity: 0.65;
+}
+
+.forum-share-qr-fallback-title {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--fm-text);
+	margin: 0 0 6px 0;
+	line-height: 1.3;
+}
+
+.forum-share-qr-fallback-body {
+	font-size: 11.5px;
+	color: var(--fm-text-muted);
+	margin: 0;
+	line-height: 1.4;
+	max-width: 180px;
+}
+
+.forum-share-qr-loading {
+	background: var(--fm-bg-alt, rgba(0, 0, 0, 0.02));
+}
+
 .forum-share-copy {
 	background: none;
 	border: none;

@@ -526,6 +526,42 @@
 	line-height: 1.4;
 }
 
+.qr-overlay-fallback {
+	width: 280px;
+	height: 280px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	padding: 24px;
+	box-sizing: border-box;
+	border: 1px dashed var(--msg-border);
+	border-radius: 12px;
+	background: var(--msg-bg);
+	text-align: center;
+}
+
+.qr-overlay-fallback-icon {
+	color: var(--msg-text-muted);
+}
+
+.qr-overlay-fallback-title {
+	color: var(--msg-text);
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 16px;
+	line-height: 1.35;
+	max-width: 30ch;
+}
+
+.qr-overlay-fallback-body {
+	color: var(--msg-text-muted);
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 13px;
+	line-height: 1.5;
+	max-width: 32ch;
+}
+
 .qr-copy-btn {
 	margin-top: 20px;
 	padding: 10px 24px;

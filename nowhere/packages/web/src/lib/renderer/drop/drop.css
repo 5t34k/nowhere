@@ -413,6 +413,31 @@
 	display: block;
 }
 
+.qr-image-cell-fallback {
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	min-height: 220px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.qr-image-cell-fallback .qr-fallback-icon {
+	color: var(--drop-text-muted, #888);
+	opacity: 0.5;
+}
+
+.qr-image-cell-fallback .qr-fallback-stamp {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	letter-spacing: 0.18em;
+	color: var(--drop-text-muted);
+	border: 1px dashed currentColor;
+	padding: 4px 10px;
+	border-radius: 2px;
+}
+
 .qr-doc-line {
 	display: flex;
 	align-items: flex-start;

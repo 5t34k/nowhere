@@ -149,6 +149,7 @@
 
 	// ─── QR code ───
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let showQr = $state(false);
 
 	$effect(() => {
@@ -157,7 +158,8 @@
 				width: 512,
 				margin: 2,
 				color: { dark: '#000000', light: '#ffffff' }
-			}).then((url) => { qrDataUrl = url; });
+			}).then((url) => { qrDataUrl = url; })
+			  .catch(() => { qrTooLong = true; });
 		}
 	});
 
@@ -260,7 +262,7 @@
 	{/if}
 
 
-	{#if qrDataUrl && showQr}
+	{#if showQr}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="qr-backdrop" onclick={() => (showQr = false)}>
@@ -274,24 +276,54 @@
 					</button>
 				</div>
 				<div class="qr-doc-body">
-					<div class="qr-image-row">
-						<div class="qr-line-gutter"></div>
-						<div class="qr-image-cell">
-							<img src={qrDataUrl} alt="QR code" />
+					{#if qrTooLong}
+						<div class="qr-image-row">
+							<div class="qr-line-gutter"></div>
+							<div class="qr-image-cell qr-image-cell-fallback">
+								<svg class="qr-fallback-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<rect x="3" y="3" width="7" height="7"/>
+									<rect x="14" y="14" width="3" height="3"/>
+									<rect x="3" y="14" width="7" height="7"/>
+								</svg>
+								<div class="qr-fallback-stamp">QR UNAVAILABLE</div>
+							</div>
 						</div>
-					</div>
-					<div class="qr-doc-line">
-						<div class="qr-line-num">1</div>
-						<div class="qr-line-text">Scan to read this drop</div>
-					</div>
-					<div class="qr-doc-line">
-						<div class="qr-line-num">2</div>
-						<div class="qr-line-text">
-							<button class="qr-copy-link" onclick={copyUrl}>
-								{linkCopied ? '[Copied!]' : '[Copy Link]'}
-							</button>
+						<div class="qr-doc-line">
+							<div class="qr-line-num">1</div>
+							<div class="qr-line-text">This drop is too large to fit in a QR code.</div>
 						</div>
-					</div>
+						<div class="qr-doc-line">
+							<div class="qr-line-num">2</div>
+							<div class="qr-line-text">The link itself contains the entire drop.</div>
+						</div>
+						<div class="qr-doc-line">
+							<div class="qr-line-num">3</div>
+							<div class="qr-line-text">
+								<button class="qr-copy-link" onclick={copyUrl}>
+									{linkCopied ? '[Copied!]' : '[Copy Link]'}
+								</button>
+							</div>
+						</div>
+					{:else if qrDataUrl}
+						<div class="qr-image-row">
+							<div class="qr-line-gutter"></div>
+							<div class="qr-image-cell">
+								<img src={qrDataUrl} alt="QR code" />
+							</div>
+						</div>
+						<div class="qr-doc-line">
+							<div class="qr-line-num">1</div>
+							<div class="qr-line-text">Scan to read this drop</div>
+						</div>
+						<div class="qr-doc-line">
+							<div class="qr-line-num">2</div>
+							<div class="qr-line-text">
+								<button class="qr-copy-link" onclick={copyUrl}>
+									{linkCopied ? '[Copied!]' : '[Copy Link]'}
+								</button>
+							</div>
+						</div>
+					{/if}
 				</div>
 			</div>
 		</div>

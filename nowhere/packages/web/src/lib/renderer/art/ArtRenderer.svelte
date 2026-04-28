@@ -100,6 +100,7 @@
 
 	// ─── QR code ───
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let showQr = $state(false);
 
 	$effect(() => {
@@ -108,7 +109,8 @@
 				width: 512,
 				margin: 2,
 				color: { dark: '#000000', light: '#ffffff' }
-			}).then((url) => { qrDataUrl = url; });
+			}).then((url) => { qrDataUrl = url; })
+			  .catch(() => { qrTooLong = true; });
 		}
 	});
 
@@ -271,7 +273,7 @@
 		</div>
 	{/if}
 
-	{#if qrDataUrl && showQr}
+	{#if showQr}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="art-qr-backdrop" onclick={() => (showQr = false)}>
@@ -285,7 +287,19 @@
 					</button>
 				</div>
 				<div class="art-qr-body">
-					<img src={qrDataUrl} alt="QR code" />
+					{#if qrTooLong}
+						<div class="art-qr-fallback">
+							<svg class="art-qr-fallback-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<rect x="3" y="3" width="7" height="7"/>
+								<rect x="14" y="14" width="3" height="3"/>
+								<rect x="3" y="14" width="7" height="7"/>
+							</svg>
+							<div class="art-qr-fallback-title">This work is too large for a QR code.</div>
+							<div class="art-qr-fallback-body">The link itself contains the entire piece. Copy it and share directly.</div>
+						</div>
+					{:else if qrDataUrl}
+						<img src={qrDataUrl} alt="QR code" />
+					{/if}
 					<button class="art-qr-copy" onclick={copyUrl}>
 						{linkCopied ? '[Copied!]' : '[Copy Link]'}
 					</button>

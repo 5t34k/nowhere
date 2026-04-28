@@ -214,6 +214,41 @@
 	display: block;
 }
 
+.art-qr-fallback {
+	width: 240px;
+	height: 240px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 22px;
+	box-sizing: border-box;
+	text-align: center;
+	border: 1px dashed #d8d4cc;
+	background: #fbfaf6;
+}
+
+.art-qr-fallback-icon {
+	color: #b3aea4;
+}
+
+.art-qr-fallback-title {
+	font-family: Georgia, 'Times New Roman', Times, serif;
+	font-size: 14px;
+	color: #2a2a2a;
+	line-height: 1.35;
+	max-width: 28ch;
+}
+
+.art-qr-fallback-body {
+	font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+	font-size: 11px;
+	color: #888;
+	line-height: 1.5;
+	max-width: 32ch;
+}
+
 .art-qr-copy {
 	background: none;
 	border: none;
@@ -291,6 +326,8 @@
 .art-page.theme-b {
 	background: #000;
 	height: auto;
+	min-height: 100vh;
+	min-height: 100dvh;
 	overflow: visible;
 }
 

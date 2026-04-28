@@ -104,6 +104,7 @@
 	// ─── Share QR ───
 	let shareOpen = $state(false);
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let linkCopied = $state(false);
 
 	$effect(() => {
@@ -112,7 +113,8 @@
 				width: 512,
 				margin: 2,
 				color: { dark: '#000000', light: '#ffffff' }
-			}).then((url: string) => { qrDataUrl = url; });
+			}).then((url: string) => { qrDataUrl = url; })
+			  .catch(() => { qrTooLong = true; });
 		}
 	});
 
@@ -297,7 +299,7 @@
 	</div>
 {/if}
 
-{#if shareOpen && qrDataUrl}
+{#if shareOpen}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="forum-share-backdrop" onclick={() => (shareOpen = false)}>
@@ -311,7 +313,21 @@
 				</button>
 			</div>
 			<div class="forum-share-body">
-				<img src={qrDataUrl} alt="QR code" class="forum-share-qr" />
+				{#if qrTooLong}
+					<div class="forum-share-qr forum-share-qr-fallback">
+						<svg class="forum-share-qr-fallback-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<rect x="3" y="3" width="7" height="7"/>
+							<rect x="14" y="14" width="3" height="3"/>
+							<rect x="3" y="14" width="7" height="7"/>
+						</svg>
+						<p class="forum-share-qr-fallback-title">This forum is too large for a QR code</p>
+						<p class="forum-share-qr-fallback-body">The link itself contains the entire forum. Copy it and share directly.</p>
+					</div>
+				{:else if qrDataUrl}
+					<img src={qrDataUrl} alt="QR code" class="forum-share-qr" />
+				{:else}
+					<div class="forum-share-qr forum-share-qr-loading"></div>
+				{/if}
 				<button class="forum-share-copy" onclick={copyUrl}>
 					{linkCopied ? 'Copied!' : 'Copy Link'}
 				</button>

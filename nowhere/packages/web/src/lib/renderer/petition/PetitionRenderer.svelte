@@ -95,6 +95,7 @@
 
 	// ─── QR code ───
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let showQr = $state(false);
 
 	$effect(() => {
@@ -105,6 +106,8 @@
 				color: { dark: '#000000', light: '#ffffff' }
 			}).then((url) => {
 				qrDataUrl = url;
+			}).catch(() => {
+				qrTooLong = true;
 			});
 		}
 	});
@@ -539,21 +542,31 @@
 		</button>
 	{/if}
 
-	{#if qrDataUrl}
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="qr-overlay" class:visible={showQr} onclick={() => (showQr = false)}>
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<div class="qr-overlay" class:visible={showQr} onclick={() => (showQr = false)}>
-			<!-- svelte-ignore a11y_click_events_have_key_events -->
-			<!-- svelte-ignore a11y_no_static_element_interactions -->
-			<div class="qr-overlay-content" onclick={(e) => e.stopPropagation()}>
+		<div class="qr-overlay-content" onclick={(e) => e.stopPropagation()}>
+			{#if qrTooLong}
+				<div class="qr-overlay-fallback">
+					<svg class="qr-overlay-fallback-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<rect x="3" y="3" width="7" height="7"/>
+						<rect x="14" y="14" width="3" height="3"/>
+						<rect x="3" y="14" width="7" height="7"/>
+					</svg>
+					<div class="qr-overlay-fallback-title">This petition is too long for a QR code.</div>
+					<div class="qr-overlay-fallback-body">The link itself contains the petition in full. Copy it below to share.</div>
+				</div>
+			{:else if qrDataUrl}
 				<img src={qrDataUrl} alt="QR code" />
 				<div class="qr-overlay-title">{title}</div>
 				<div class="qr-overlay-label">Scan to sign</div>
-				<button class="qr-copy-btn" onclick={copyUrl}>
-					{linkCopied ? 'Copied!' : 'Copy link'}
-				</button>
-			</div>
+			{/if}
+			<button class="qr-copy-btn" onclick={copyUrl}>
+				{linkCopied ? 'Copied!' : 'Copy link'}
+			</button>
 		</div>
-	{/if}
+	</div>
 </div>
 {/if}

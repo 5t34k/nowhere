@@ -147,6 +147,7 @@
 
 	// ─── QR code ───
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let showQr = $state(false);
 
 	$effect(() => {
@@ -156,6 +157,8 @@
 				color: { dark: '#000000', light: '#ffffff' }
 			}).then((url) => {
 				qrDataUrl = url;
+			}).catch(() => {
+				qrTooLong = true;
 			});
 		}
 	});
@@ -543,10 +546,22 @@
 				</button>
 				<div class="fr-share-modal-header">Share this campaign</div>
 				<div class="fr-share-modal-name">{data.name}</div>
-				{#if qrDataUrl}
+				{#if qrTooLong}
+					<div class="fr-share-modal-qr fr-share-modal-qr-fallback">
+						<svg class="fr-share-fallback-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<rect x="3" y="3" width="7" height="7"/>
+							<rect x="14" y="14" width="3" height="3"/>
+							<rect x="3" y="14" width="7" height="7"/>
+						</svg>
+						<div class="fr-share-fallback-title">This campaign is too large for a QR code</div>
+						<div class="fr-share-fallback-body">The link itself contains the entire fundraiser. Copy it below to share.</div>
+					</div>
+				{:else if qrDataUrl}
 					<img src={qrDataUrl} alt="QR code" class="fr-share-modal-qr" />
 				{/if}
-				<div class="fr-share-modal-hint">Scan to view this fundraiser</div>
+				{#if !qrTooLong}
+					<div class="fr-share-modal-hint">Scan to view this fundraiser</div>
+				{/if}
 				<button class="fr-share-modal-copy" onclick={copyUrl}>
 					{#if linkCopied}
 						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -647,7 +662,19 @@
 				{/if}
 			</button>
 
-			{#if qrDataUrl}
+			{#if qrTooLong}
+				<div class="fr-share-sheet-qr-wrap" bind:this={qrWrapEl}>
+					<div class="fr-share-modal-qr-fallback fr-share-modal-qr-fallback--sheet">
+						<svg class="fr-share-fallback-icon" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<rect x="3" y="3" width="7" height="7"/>
+							<rect x="14" y="14" width="3" height="3"/>
+							<rect x="3" y="14" width="7" height="7"/>
+						</svg>
+						<div class="fr-share-fallback-title">Too large for a QR code</div>
+						<div class="fr-share-fallback-body">The link itself contains the campaign. Copy it above to share.</div>
+					</div>
+				</div>
+			{:else if qrDataUrl}
 				<button class="fr-share-sheet-qr-toggle" onclick={async () => { showShareQr = !showShareQr; if (showShareQr) { await tick(); qrWrapEl?.scrollIntoView({ behavior: 'smooth', block: 'end' }); } }}>
 					<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
 					{showShareQr ? 'Hide' : 'Show'} QR code

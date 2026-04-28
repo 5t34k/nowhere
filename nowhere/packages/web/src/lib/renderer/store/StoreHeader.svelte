@@ -25,6 +25,7 @@
 	// ─── Share QR ───
 	let shareOpen = $state(false);
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let linkCopied = $state(false);
 
 	$effect(() => {
@@ -33,7 +34,8 @@
 				width: 512,
 				margin: 2,
 				color: { dark: '#000000', light: '#ffffff' }
-			}).then((url: string) => { qrDataUrl = url; });
+			}).then((url: string) => { qrDataUrl = url; })
+			  .catch(() => { qrTooLong = true; });
 		}
 	});
 
@@ -100,7 +102,7 @@
 	</div>
 {/if}
 
-{#if shareOpen && qrDataUrl}
+{#if shareOpen}
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div class="share-backdrop" onclick={() => (shareOpen = false)}>
@@ -114,7 +116,21 @@
 				</button>
 			</div>
 			<div class="share-modal-body">
-				<img src={qrDataUrl} alt="QR code" class="share-qr" />
+				{#if qrTooLong}
+					<div class="share-qr share-qr-fallback">
+						<svg class="share-qr-fallback-icon" width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<rect x="3" y="3" width="7" height="7"/>
+							<rect x="14" y="14" width="3" height="3"/>
+							<rect x="3" y="14" width="7" height="7"/>
+						</svg>
+						<p class="share-qr-fallback-title">This store is too large for a QR code</p>
+						<p class="share-qr-fallback-body">The link itself contains the entire store. Copy it and share directly.</p>
+					</div>
+				{:else if qrDataUrl}
+					<img src={qrDataUrl} alt="QR code" class="share-qr" />
+				{:else}
+					<div class="share-qr share-qr-loading"></div>
+				{/if}
 				<button class="share-copy" onclick={copyUrl}>
 					{linkCopied ? 'Copied!' : 'Copy Link'}
 				</button>
@@ -395,6 +411,45 @@
 		border-radius: 4px;
 		display: block;
 		image-rendering: pixelated;
+	}
+
+	.share-qr-fallback {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		text-align: center;
+		padding: 18px;
+		box-sizing: border-box;
+		border: 1px dashed var(--color-border);
+		background: var(--color-bg-secondary);
+		image-rendering: auto;
+	}
+
+	.share-qr-fallback-icon {
+		color: var(--color-text-muted);
+		margin-bottom: 14px;
+		opacity: 0.65;
+	}
+
+	.share-qr-fallback-title {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-text);
+		margin: 0 0 6px 0;
+		line-height: 1.3;
+	}
+
+	.share-qr-fallback-body {
+		font-size: 11.5px;
+		color: var(--color-text-secondary);
+		margin: 0;
+		line-height: 1.4;
+		max-width: 180px;
+	}
+
+	.share-qr-loading {
+		background: var(--color-bg-secondary);
 	}
 
 	.share-copy {

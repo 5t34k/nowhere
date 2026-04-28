@@ -227,9 +227,18 @@
 	);
 
 	let qrDataUrl = $state('');
+	let qrTooLong = $state(false);
 	let menuOpen  = $state(false);
 	let qrOpen    = $state(false);
 	let linkCopied = $state(false);
+
+	async function handleCopyFromOverlay() {
+		try {
+			await navigator.clipboard.writeText(window.location.href);
+			linkCopied = true;
+			setTimeout(() => (linkCopied = false), 1500);
+		} catch {}
+	}
 
 	function toggleMenu() { menuOpen = !menuOpen; }
 
@@ -266,6 +275,8 @@
 				color: { dark: '#000000', light: '#ffffff' }
 			}).then((url: string) => {
 				qrDataUrl = url;
+			}).catch(() => {
+				qrTooLong = true;
 			});
 		}
 	});
@@ -361,28 +372,47 @@
 
 {/if}
 
-{#if qrDataUrl}
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events -->
+<div class="qr-overlay no-print" class:qr-visible={qrOpen} data-preset={preset}
+     style="--accent: {accentColor || '#ffffff'}"
+     onclick={() => qrOpen = false}>
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
-	<div class="qr-overlay no-print" class:qr-visible={qrOpen} data-preset={preset}
-	     style="--accent: {accentColor || '#ffffff'}"
-	     onclick={() => qrOpen = false}>
-		<!-- svelte-ignore a11y_no_static_element_interactions -->
-		<!-- svelte-ignore a11y_click_events_have_key_events -->
-		<div class="qr-card" onclick={(e) => e.stopPropagation()}>
-			<img src={qrDataUrl} alt="QR code" class="qr-large" />
-			{#if data?.name}
-				<p class="qr-title">{data.name}</p>
-			{/if}
-			<p class="qr-label">Scan to share</p>
-			<button class="qr-close" onclick={() => qrOpen = false} aria-label="Close">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-					<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+	<div class="qr-card" class:qr-card-fallback={qrTooLong} onclick={(e) => e.stopPropagation()}>
+		{#if qrTooLong}
+			<div class="qr-fallback">
+				<svg class="qr-fallback-icon" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+					<rect x="3" y="3" width="7" height="7"/>
+					<rect x="14" y="14" width="3" height="3"/>
+					<rect x="3" y="14" width="7" height="7"/>
+					<line x1="14" y1="3" x2="21" y2="10"/>
+					<line x1="21" y1="3" x2="14" y2="10"/>
 				</svg>
-			</button>
-		</div>
+				<p class="qr-fallback-title">This event is too large for a QR code</p>
+				<p class="qr-fallback-body">The link itself contains the entire event poster. Copy it and share it directly.</p>
+				<button class="qr-fallback-copy" onclick={handleCopyFromOverlay}>
+					{linkCopied ? 'Copied' : 'Copy link'}
+				</button>
+			</div>
+		{:else if qrDataUrl}
+			<img src={qrDataUrl} alt="QR code" class="qr-large" />
+		{:else}
+			<div class="qr-large qr-loading">Generating QR…</div>
+		{/if}
+		{#if !qrTooLong && data?.name}
+			<p class="qr-title">{data.name}</p>
+		{/if}
+		{#if !qrTooLong}
+			<p class="qr-label">Scan to share</p>
+		{/if}
+		<button class="qr-close" onclick={() => qrOpen = false} aria-label="Close">
+			<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+				<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+			</svg>
+		</button>
 	</div>
-{/if}
+</div>
 
 <style>
 	:global(body) {
@@ -582,6 +612,101 @@
 		font-size: 0.8125rem;
 		color: #999;
 		font-family: system-ui, Arial, sans-serif;
+		image-rendering: auto;
+	}
+
+	/* ── QR fallback (URL too long) ── */
+	.qr-fallback {
+		width: 100%;
+		aspect-ratio: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		padding: 1.5rem;
+		box-sizing: border-box;
+		text-align: center;
+		border: 1px dashed rgba(0, 0, 0, 0.18);
+		border-radius: 8px;
+		background: rgba(0, 0, 0, 0.02);
+	}
+
+	.qr-fallback-icon {
+		color: rgba(0, 0, 0, 0.45);
+	}
+
+	.qr-fallback-title {
+		font-size: 1rem;
+		font-weight: 600;
+		color: #111;
+		margin: 0;
+		font-family: system-ui, -apple-system, Arial, sans-serif;
+		letter-spacing: -0.01em;
+		max-width: 32ch;
+		line-height: 1.3;
+	}
+
+	.qr-fallback-body {
+		font-size: 0.8125rem;
+		color: #666;
+		margin: 0;
+		font-family: system-ui, -apple-system, Arial, sans-serif;
+		max-width: 38ch;
+		line-height: 1.5;
+	}
+
+	.qr-fallback-copy {
+		margin-top: 0.5rem;
+		padding: 0.5rem 1rem;
+		font-size: 0.75rem;
+		font-family: system-ui, -apple-system, Arial, sans-serif;
+		font-weight: 500;
+		letter-spacing: 0.02em;
+		border: 1px solid rgba(0, 0, 0, 0.18);
+		border-radius: 6px;
+		background: transparent;
+		color: #111;
+		cursor: pointer;
+		transition: background 0.12s, border-color 0.12s, color 0.12s;
+	}
+	.qr-fallback-copy:hover {
+		background: rgba(0, 0, 0, 0.06);
+		border-color: var(--accent);
+		color: var(--accent);
+	}
+
+	/* Underground: dark fallback */
+	.qr-overlay[data-preset="u"] .qr-fallback {
+		border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+		background: rgba(255, 255, 255, 0.02);
+	}
+	.qr-overlay[data-preset="u"] .qr-fallback-icon {
+		color: var(--accent);
+		opacity: 0.7;
+	}
+	.qr-overlay[data-preset="u"] .qr-fallback-title {
+		color: rgba(255, 255, 255, 0.92);
+		font-family: 'Arial Black', Arial, sans-serif;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		font-size: 0.875rem;
+	}
+	.qr-overlay[data-preset="u"] .qr-fallback-body {
+		color: rgba(255, 255, 255, 0.55);
+	}
+	.qr-overlay[data-preset="u"] .qr-fallback-copy {
+		border-color: rgba(255, 255, 255, 0.18);
+		color: rgba(255, 255, 255, 0.85);
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+		font-family: 'Arial Black', Arial, sans-serif;
+		font-size: 0.625rem;
+	}
+	.qr-overlay[data-preset="u"] .qr-fallback-copy:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: var(--accent);
+		color: var(--accent);
 	}
 
 	/* Underground: invert QR for dark card */
