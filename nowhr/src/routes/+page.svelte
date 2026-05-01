@@ -52,7 +52,9 @@
 		}
 
 		const host = window.location.hostname;
-		if (host !== 'nowhr.xyz') instanceHost = host;
+		const parts = host.split('.');
+		const base = parts.length >= 2 && !/^\d+$/.test(parts[0]) ? parts.slice(-2).join('.') : host;
+		if (base !== 'nowhr.xyz') instanceHost = base;
 
 		const btn = document.getElementById('theme-toggle');
 		btn?.addEventListener('click', toggle);

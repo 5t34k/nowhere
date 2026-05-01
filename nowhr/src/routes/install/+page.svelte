@@ -110,7 +110,7 @@
 				<a href="https://hostednowhere.com" class="wordmark">nowhere</a>
 				<span class="wordmark-suffix">App</span>
 			</div>
-			<p class="body">The Nowhere app lets you open and create Nowhere sites with no network connection. Scan a QR code, tap a link, or paste one in. The site loads entirely on your device, from the URL itself.</p>
+			<p class="body">The Nowhere app lets you open and create Nowhere sites with no network connection. Scan a QR code or paste one in. The site loads entirely on your device, from the URL itself.</p>
 		</div>
 	</section>
 
@@ -168,7 +168,7 @@
 				</div>
 				<div class="feature reveal">
 					<div class="feature-name">Open</div>
-					<div class="feature-desc">Paste or tap any Nowhere link. Stores, forums, events, petitions, drops, messages, art. Everything loads from the URL fragment alone.</div>
+					<div class="feature-desc">Paste or scan any Nowhere link. Everything loads from the URL fragment alone.</div>
 				</div>
 				<div class="feature reveal">
 					<div class="feature-name">Create</div>
@@ -176,7 +176,7 @@
 				</div>
 				<div class="feature reveal">
 					<div class="feature-name">Offline</div>
-					<div class="feature-desc">No server to fetch from means no connection required. Once installed, the app works without the internet.</div>
+					<div class="feature-desc">No server to fetch from means no connection required. Once installed, the app works without the internet. You can build any site with no connection and use five of the eight site types fully offline</div>
 				</div>
 			</div>
 		</div>

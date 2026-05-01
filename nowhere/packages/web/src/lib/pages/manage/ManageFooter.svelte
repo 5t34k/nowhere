@@ -1,10 +1,17 @@
+<script lang="ts">
+	import { getContext } from 'svelte';
+
+	const sidebarNav = getContext<{ supportHref?: string }>('sidebarNav') ?? {};
+	const supportHref = sidebarNav.supportHref ?? 'https://hostednowhere.com/support';
+</script>
+
 <footer class="footer">
 	<div class="footer-left">
 		<div class="footer-mark">nowhere</div>
 		<div class="footer-tagline">Hosted nowhere. Present everywhere.</div>
 	</div>
 	<div class="footer-links">
-		<a href="#" class="footer-link">support the project</a>
+		<a href={supportHref} class="footer-link">support the project</a>
 		<span class="footer-sep">·</span>
 		<a href="#" class="footer-link">github</a>
 	</div>

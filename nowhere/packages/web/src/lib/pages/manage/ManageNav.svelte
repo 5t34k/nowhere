@@ -1,5 +1,12 @@
 <script lang="ts">
+	import { getContext } from 'svelte';
+
 	let { highlightManage = false } = $props();
+
+	const sidebarNav = getContext<{ homeHref?: string; appHref?: string; createHref?: string }>('sidebarNav') ?? {};
+	const homeHref = sidebarNav.homeHref ?? 'https://hostednowhere.com';
+	const appHref = sidebarNav.appHref ?? 'https://nowhr.xyz/install';
+	const createHref = sidebarNav.createHref ?? 'https://hostednowhere.com/#create';
 
 	const tools = [
 		{ name: 'Forum',      href: 'https://hostednowhere.com/forum' },
@@ -59,7 +66,7 @@
 {/if}
 
 <nav class="nav">
-	<a href="https://hostednowhere.com" class="nav-mark">nowhere</a>
+	<a href={homeHref} class="nav-mark">nowhere</a>
 	<div class="nav-links">
 		<div class="nav-dropdown">
 			<button class="nav-link nav-dropdown-btn" class:active={toolsOpen} onclick={toggle}>tools</button>
@@ -71,9 +78,9 @@
 				</div>
 			{/if}
 		</div>
-		<a href="https://nowhr.xyz" class="nav-link">app</a>
+		<a href={appHref} class="nav-link">app</a>
 		<a href="https://hostednowhere.com/manage" class="nav-link" class:nav-link-active={highlightManage}>manage</a>
-		<a href="https://hostednowhere.com/#create" class="nav-link nav-link-create">create →</a>
+		<a href={createHref} class="nav-link nav-link-create">create →</a>
 	</div>
 </nav>
 

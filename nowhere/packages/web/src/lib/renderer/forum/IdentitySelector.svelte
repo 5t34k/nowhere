@@ -61,10 +61,12 @@
 					<span class="identity-dropdown-hint">Choose how to participate</span>
 				</div>
 				<div class="identity-dropdown-actions">
-					<button class="identity-action-btn connect" onclick={onConnectNip07}>
-						Sign in with Extension
-					</button>
-					{#if identityMode === 1}
+					{#if identityMode !== 2}
+						<button class="identity-action-btn connect" onclick={onConnectNip07}>
+							Sign in with Extension
+						</button>
+					{/if}
+					{#if identityMode === 1 || identityMode === 2}
 						<button class="identity-action-btn anon" onclick={() => { onStartAnon(); open = false; }}>
 							Post Anonymously
 						</button>

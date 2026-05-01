@@ -1,6 +1,9 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, getContext } from 'svelte';
 	import { decryptFragment } from '@nowhere/codec';
+
+	const sidebarNav = getContext<{ homeHref?: string }>('sidebarNav') ?? {};
+	const homeHref = sidebarNav.homeHref ?? 'https://hostednowhere.com';
 	import { initHashReader } from '$lib/renderer/utils/hash-reader.js';
 	import { siteData, decodeError, v1Deprecated, isLoading, decodeFromHash } from '$lib/renderer/stores/site-data.js';
 	import LoadingScreen from '$lib/renderer/components/LoadingScreen.svelte';
@@ -122,7 +125,7 @@
 {:else}
 	<main class="center-page landing-shell">
 		<div class="composition">
-			<a href="https://hostednowhere.com" class="wordmark">nowhere</a>
+			<a href={homeHref} class="wordmark">nowhere</a>
 			<div class="input-wrap">
 				<input
 					class="link-input"

@@ -22,7 +22,9 @@
 		message: 'Message',
 		fundraiser: 'Fundraiser',
 		petition: 'Petition',
-		drop: 'Drop'
+		drop: 'Drop',
+		discussion: 'Forum',
+		art: 'Art'
 	};
 
 	const pageTitle = $derived.by(() => {
