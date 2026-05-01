@@ -198,7 +198,7 @@
 	const allContacts = $derived.by((): ContactItem[] => {
 		const items: ContactItem[] = [];
 		if (nostrContact) {
-			items.push({ label: 'Nostr', detail: 'View on Nostr', href: `https://njump.me/${data?.pubkey}` });
+			items.push({ label: 'Nostr', detail: 'View on Nostr', href: `https://njump.me/${npub}` });
 		}
 		if (contactEmail) {
 			items.push({ label: 'Email', detail: contactEmail, href: `mailto:${contactEmail}` });

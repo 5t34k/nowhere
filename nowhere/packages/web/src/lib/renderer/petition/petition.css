@@ -58,6 +58,13 @@
 	--msg-sign-bg-hover: #3d3935;
 	--msg-sign-text: #ffffff;
 
+	--color-bg: var(--msg-bg);
+	--color-bg-secondary: var(--msg-code-bg);
+	--color-text: var(--msg-text);
+	--color-text-secondary: var(--msg-text-secondary);
+	--color-text-muted: var(--msg-text-muted);
+	--color-border: var(--msg-border);
+
 	font-family: Georgia, 'Times New Roman', Times, serif;
 	font-size: 20px;
 	line-height: 1.75;
