@@ -32,7 +32,7 @@
 		onUpdate(newTags);
 	}
 
-	const MAX_TOPIC_LENGTH = 24;
+	const MAX_TOPIC_LENGTH = 40;
 
 	function updateTopic(index: number, value: string) {
 		localTopics[index] = value.slice(0, MAX_TOPIC_LENGTH);

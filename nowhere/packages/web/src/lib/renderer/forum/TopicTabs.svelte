@@ -185,7 +185,7 @@
 				class:active={activeInHidden && isPostsView}
 				onclick={() => { moreOpen = !moreOpen; }}
 			>
-				{moreLabel}
+				<span class="more-tab-label">{moreLabel}</span>
 				{#if hiddenUnread > 0 && !activeInHidden}
 					<span class="topic-unread-count">{hiddenUnread}</span>
 				{/if}

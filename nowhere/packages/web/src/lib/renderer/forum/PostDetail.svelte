@@ -95,12 +95,14 @@
 		<AuthorIdentity pubkey={post.payload.p} {privacyMode} size={48} {profileRelays} {forumCache} {onOpenProfileCard} />
 	</div>
 	<div class="thread-op-body">
-		{#if onSharePost}
-			<button class="post-share-btn" onclick={sharePost} title="Copy link to post">
-				{#if copied}Copied!{:else}Share Post{/if}
-			</button>
-		{/if}
-		<h2 class="thread-op-title">{post.payload.t}</h2>
+		<div class="thread-op-header">
+			<h2 class="thread-op-title">{post.payload.t}</h2>
+			{#if onSharePost}
+				<button class="post-share-btn" onclick={sharePost} title="Copy link to post">
+					{#if copied}Copied!{:else}Share Post{/if}
+				</button>
+			{/if}
+		</div>
 		{#if post.payload.b}
 			<div class="thread-op-text"><Linkified text={post.payload.b} /></div>
 		{/if}

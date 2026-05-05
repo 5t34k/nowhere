@@ -308,11 +308,26 @@
 	margin-bottom: -1px;
 }
 
+.more-tab {
+	display: inline-flex;
+	align-items: center;
+	max-width: min(25ch, 50vw);
+	min-width: 0;
+}
+
+.more-tab-label {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	min-width: 0;
+}
+
 .more-tab .more-chevron {
 	font-size: 10px;
 	margin-left: 2px;
 	display: inline-block;
 	transition: transform 150ms;
+	flex-shrink: 0;
 }
 
 .more-tab .more-chevron.open {
@@ -2332,14 +2347,21 @@
 }
 
 /* ─── Share Post Button ─── */
-.thread-op-body {
-	position: relative;
+.thread-op-header {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	margin-bottom: 6px;
+}
+
+.thread-op-header .thread-op-title {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
 }
 
 .post-share-btn {
-	position: absolute;
-	top: 0;
-	right: 0;
+	flex-shrink: 0;
 	background: none;
 	border: 1px solid var(--fm-border);
 	border-radius: 4px;
