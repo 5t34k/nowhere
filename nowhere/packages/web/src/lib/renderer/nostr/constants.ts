@@ -14,7 +14,7 @@ export const DEFAULT_FORUM_EVENT_RELAYS = [
 ];
 
 export const DEFAULT_FORUM_PROFILE_RELAYS = [
-	'wss://relay.damus.io', 'wss://purplepag.es', 'wss://nostr.bitcoiner.social'
+	'wss://relay.damus.io', 'wss://nostr.bitcoiner.social', 'wss://user.kindpag.es', 'wss://purplerelay.com'
 ];
 
 export const DEFAULT_PETITION_RELAYS = [

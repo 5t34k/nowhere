@@ -146,7 +146,7 @@ export async function publishToRelays(event: Event, relays: string[], label: str
 }
 
 const PROFILE_RELAY = 'wss://relay.primal.net';
-const PROFILE_FETCH_TIMEOUT_MS = 4000;
+const PROFILE_FETCH_TIMEOUT_MS = 8000;
 
 const profileCache = new Map<string, Promise<Event | null>>();
 
@@ -247,11 +247,18 @@ export async function fetchProfiles(
 	if (needFetch.length > 0) {
 		const p = getPool();
 		const r = resolveProfileRelays(profileRelays);
-		const batchPromise = withTimeout(
-			p.querySync(r, { kinds: [0], authors: needFetch, limit: needFetch.length }),
-			PROFILE_FETCH_TIMEOUT_MS,
-			[] as Event[]
-		).catch(() => [] as Event[]);
+		const filter = { kinds: [0], authors: needFetch, limit: needFetch.length };
+		// Query each relay independently with its own timeout so a single slow
+		// or dead relay can't poison the whole batch. Failed/timed-out relays
+		// contribute an empty array; healthy relays still return their events.
+		const batchPromise = Promise.allSettled(
+			r.map((url) =>
+				withTimeout(p.querySync([url], filter), PROFILE_FETCH_TIMEOUT_MS, [] as Event[])
+					.catch(() => [] as Event[])
+			)
+		).then((settled) =>
+			settled.flatMap((s) => (s.status === 'fulfilled' ? s.value : []))
+		);
 
 		// Create a per-pubkey resolver so individual fetchProfile() calls
 		// made before the batch resolves share the same underlying promise.
