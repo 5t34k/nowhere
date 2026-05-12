@@ -25,6 +25,8 @@
 	import type { VoiceSignal } from '$lib/renderer/nostr/forum-voice.js';
 	import { VoiceMesh } from '$lib/renderer/nostr/voice-mesh.js';
 
+	import { ensureSignedIn, signEvent as activeSignEvent, signOut as activeSignOut } from '$lib/nostr/nip07.js';
+	import { getActiveSigner } from '$lib/nostr/signer.js';
 	import { sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import ForumHeader from './ForumHeader.svelte';
@@ -435,21 +437,19 @@
 		}
 	});
 
-	// Restore NIP-07 session on load if previously connected
+	// Restore signed-in session on load if a global signer is already active.
 	$effect(() => {
-		if (typeof sessionStorage === 'undefined' || typeof window === 'undefined') return;
+		if (typeof sessionStorage === 'undefined') return;
 		const saved = sessionStorage.getItem(NIP07_KEY);
-		if (!saved || !window.nostr) return;
-		window.nostr.getPublicKey().then(pk => {
-			if (pk === saved) {
-				nip07Pubkey = pk;
-				anonActive = false;
-			} else {
-				sessionStorage.removeItem(NIP07_KEY);
-			}
-		}).catch(() => {
+		if (!saved) return;
+		const s = getActiveSigner();
+		if (s && s.pubkey === saved) {
+			nip07Pubkey = s.pubkey;
+			anonActive = false;
+		} else if (!s) {
+			// No active global signer — leave nip07Pubkey empty; the user will need to sign in again.
 			sessionStorage.removeItem(NIP07_KEY);
-		});
+		}
 	});
 
 	// Persist identity state across refreshes
@@ -496,12 +496,8 @@
 
 	async function connectNip07() {
 		connectError = '';
-		if (typeof window === 'undefined' || !window.nostr) {
-			connectError = 'No Nostr signing extension found. Install nos2x, Alby, or similar.';
-			return;
-		}
 		try {
-			nip07Pubkey = await window.nostr.getPublicKey();
+			nip07Pubkey = await ensureSignedIn();
 			anonActive = false;
 		} catch (e) {
 			connectError = `Connection failed: ${e instanceof Error ? e.message : String(e)}`;
@@ -518,11 +514,11 @@
 		nip07Pubkey = '';
 		anonActive = false;
 		connectError = '';
+		void activeSignOut();
 	}
 
 	async function signInnerRumorNip07(content: string, timestamp: number): Promise<string> {
-		if (!window.nostr) throw new Error('No signing extension');
-		const signed = await window.nostr.signEvent({
+		const signed = await activeSignEvent({
 			kind: INNER_EVENT_KIND,
 			created_at: timestamp,
 			content,

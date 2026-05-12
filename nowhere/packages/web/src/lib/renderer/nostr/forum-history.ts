@@ -1,6 +1,7 @@
 import { sha256 } from '@noble/hashes/sha2.js';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils.js';
 import { encrypt as nip44Encrypt, decrypt as nip44Decrypt } from 'nostr-tools/nip44';
+import { nip44Encrypt as activeNip44Encrypt, nip44Decrypt as activeNip44Decrypt } from '$lib/nostr/nip07.js';
 
 const HISTORY_PREFIX = 'nw-';
 
@@ -38,9 +39,8 @@ export async function loadHistory(pubkey: string): Promise<{ handle: HistoryHand
 		const blob: StoredBlob = JSON.parse(raw);
 		if (!blob.k || !blob.d) return null;
 
-		// NIP-07 decrypt to recover the symmetric key (one prompt)
-		if (!window.nostr?.nip44) return null;
-		const symKeyHex = await window.nostr.nip44.decrypt(pubkey, blob.k);
+		// Active-signer decrypt to recover the symmetric key (one prompt)
+		const symKeyHex = await activeNip44Decrypt(pubkey, blob.k);
 		const convKey = hexToBytes(symKeyHex);
 
 		// Decrypt the history data (no NIP-07 prompt)
@@ -62,13 +62,11 @@ export async function loadHistory(pubkey: string): Promise<{ handle: HistoryHand
  * wraps it via NIP-07 nip44.encrypt (one prompt).
  */
 export async function createHistoryHandle(pubkey: string): Promise<HistoryHandle> {
-	if (!window.nostr?.nip44) throw new Error('No NIP-44 support in signing extension');
-
 	const convKey = new Uint8Array(32);
 	crypto.getRandomValues(convKey);
 
-	// NIP-07 encrypt the symmetric key to self (one prompt)
-	const encKey = await window.nostr.nip44.encrypt(pubkey, bytesToHex(convKey));
+	// Active-signer encrypt the symmetric key to self (one prompt)
+	const encKey = await activeNip44Encrypt(pubkey, bytesToHex(convKey));
 	const storageKey = storageKeyForPubkey(pubkey);
 
 	return { convKey, storageKey, encKey };

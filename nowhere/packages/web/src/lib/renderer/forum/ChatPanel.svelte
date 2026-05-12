@@ -23,6 +23,7 @@
 	import type { VoiceSignal } from '$lib/renderer/nostr/forum-voice.js';
 	import { MAX_PARTICIPANTS } from '$lib/renderer/nostr/voice-mesh.js';
 	import { wrapContentForSigning, INNER_EVENT_KIND } from '$lib/renderer/nostr/nowhere-signing.js';
+	import { signEvent as activeSignEvent } from '$lib/nostr/nip07.js';
 
 	interface Props {
 		chatTag: string;
@@ -500,10 +501,10 @@
 		let wrappedContent: string | undefined;
 		let timestamp: number | undefined;
 
-		if (nip07Pubkey && window.nostr) {
+		if (nip07Pubkey) {
 			timestamp = Math.floor(Date.now() / 1000);
 			wrappedContent = wrapContentForSigning(text);
-			const signed = await window.nostr.signEvent({
+			const signed = await activeSignEvent({
 				kind: INNER_EVENT_KIND, created_at: timestamp, content: wrappedContent, tags: []
 			});
 			nip07Sig = signed.sig;
@@ -590,10 +591,10 @@
 			let nip07Sig: string | undefined;
 			let wrappedContent: string | undefined;
 			let timestamp: number | undefined;
-			if (nip07Pubkey && window.nostr) {
+			if (nip07Pubkey) {
 				timestamp = Math.floor(Date.now() / 1000);
 				wrappedContent = wrapContentForSigning('room');
-				const signed = await window.nostr.signEvent({
+				const signed = await activeSignEvent({
 					kind: INNER_EVENT_KIND, created_at: timestamp, content: wrappedContent, tags: []
 				});
 				nip07Sig = signed.sig;

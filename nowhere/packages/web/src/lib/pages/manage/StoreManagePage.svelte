@@ -25,7 +25,8 @@
 		computeDiscount,
 		type CartItem
 	} from '$lib/renderer/stores/cart.js';
-	import { hasNostrExtension, hasNip44Support, getPublicKey } from '$lib/nostr/nip07.js';
+	import { hasNip44Support, ensureSignedIn, signOut as signOutNostr, nip44Decrypt as activeNip44Decrypt } from '$lib/nostr/nip07.js';
+	import { activeSigner } from '$lib/nostr/signer.js';
 	import { computeLookupHash } from '$lib/nostr/inventory-keys.js';
 	import { RENDERER_ORIGIN } from '$lib/config.js';
 
@@ -408,23 +409,20 @@
 		ordersFromCache = false;
 		cacheEnabled = false;
 		activeTab = 'overview';
+		void signOutNostr();
 	}
 
 	async function connect() {
 		connecting = true;
 		connectError = '';
-		if (!hasNostrExtension()) {
-			connectError = 'No Nostr signing extension found. Install Alby, nos2x, or similar.';
-			connecting = false;
-			return;
-		}
-		if (!hasNip44Support()) {
-			connectError = 'Your extension does not support NIP-44 encryption.';
-			connecting = false;
-			return;
-		}
 		try {
-			sellerPubkey = await getPublicKey();
+			sellerPubkey = await ensureSignedIn();
+			if (!hasNip44Support()) {
+				connectError = 'Your signer does not support NIP-44 encryption. Try a different extension or remote signer.';
+				sellerPubkey = '';
+				connecting = false;
+				return;
+			}
 			connected = true;
 			if (hasCached) await restoreCache();
 		} catch (e) {
@@ -627,6 +625,11 @@
 	let scanMenuOpen = $state(false);
 	let syncProgress = $state('');
 
+	// Refresh decrypts every fetched event. Browser extensions silently drop
+	// ones they can't read, but bunker (NIP-46) signers prompt for each — so
+	// gate scanning to NIP-07 and steer other signers to Fetch by ID.
+	const canRefresh = $derived($activeSigner?.type === 'nip07');
+
 	function getStoreOrderRelays(): string[] {
 		const storeTags = [...loadedStores.values()].map((s) => s.data.tags);
 		return collectOrderRelays(storeTags, [...DEFAULT_ORDER_RELAYS]);
@@ -672,7 +675,7 @@
 	}
 
 	async function syncOrders(days: number | null = 30) {
-		if (!connected || !window.nostr?.nip44) return;
+		if (!connected) return;
 		syncing = true;
 		syncError = '';
 		syncProgress = 'Fetching events…';
@@ -717,7 +720,7 @@
 				syncProgress = `Decrypting ${merged.length} events…`;
 				for (let i = 0; i < merged.length; i++) {
 					try {
-						const plaintext = await window.nostr!.nip44!.decrypt(merged[i].pubkey, merged[i].content);
+						const plaintext = await activeNip44Decrypt(merged[i].pubkey, merged[i].content);
 						const parsed = JSON.parse(plaintext);
 						if (parsed.orderId) found.push({ event: merged[i], order: parsed as OrderMessage });
 					} catch {
@@ -755,7 +758,7 @@
 	}
 
 	async function fetchOrdersById() {
-		if (!connected || !window.nostr?.nip44) return;
+		if (!connected) return;
 		const raw = fetchByIdInput.trim();
 		if (!raw) return;
 
@@ -778,7 +781,7 @@
 				const events = await fetchEvents({ kinds: [30078], '#d': dtags }, getStoreOrderRelays());
 				for (const event of events) {
 					try {
-						const plaintext = await window.nostr!.nip44!.decrypt(event.pubkey, event.content);
+						const plaintext = await activeNip44Decrypt(event.pubkey, event.content);
 						const parsed = JSON.parse(plaintext);
 						if (parsed.orderId) found.push({ event, order: parsed as OrderMessage });
 					} catch {
@@ -1171,16 +1174,14 @@
 
 			if (parsed.v === 1 && typeof parsed.p === 'string' && typeof parsed.c === 'string') {
 				// Receipt format: { v: 1, p: <hex ephemeral pubkey>, c: <NIP-44 ciphertext of full event JSON> }
-				if (!window.nostr?.nip44) throw new Error('NIP-44 extension required to decrypt receipt.');
-				const eventJson = await window.nostr.nip44.decrypt(parsed.p, parsed.c);
+				const eventJson = await activeNip44Decrypt(parsed.p, parsed.c);
 				const event = JSON.parse(eventJson);
 				if (!event.pubkey || !event.content) throw new Error('Invalid receipt: decrypted content is not a Nostr event.');
-				const plaintext = await window.nostr.nip44.decrypt(event.pubkey, event.content);
+				const plaintext = await activeNip44Decrypt(event.pubkey, event.content);
 				order = JSON.parse(plaintext) as OrderMessage;
 			} else if (parsed.pubkey && typeof parsed.content === 'string' && parsed.kind) {
 				// Raw Nostr event format
-				if (!window.nostr?.nip44) throw new Error('NIP-44 extension required to decrypt event.');
-				const plaintext = await window.nostr.nip44.decrypt(parsed.pubkey, parsed.content);
+				const plaintext = await activeNip44Decrypt(parsed.pubkey, parsed.content);
 				order = JSON.parse(plaintext) as OrderMessage;
 			} else {
 				// Raw order JSON (plain OrderMessage)
@@ -1543,9 +1544,9 @@ import ManageNav from './ManageNav.svelte';
 			<span class="signin-brand-mark">nowhere</span>
 			<span class="signin-brand-type">Store</span>
 		</div>
-		<h1 class="signin-heading">Connect your<br><em>extension.</em></h1>
+		<h1 class="signin-heading">Sign in<br><em>with Nostr.</em></h1>
 		<button class="signin-btn" onclick={connect} disabled={connecting}>
-			{connecting ? 'Connecting…' : 'Connect Extension →'}
+			{connecting ? 'Connecting…' : 'Sign in →'}
 		</button>
 		{#if hasCached}
 			<p class="signin-hint">A saved session was found. Connect to restore it.</p>
@@ -1789,12 +1790,27 @@ import ManageNav from './ManageNav.svelte';
 			</div>
 
 			{#if activeTab === 'orders' && scanMenuOpen && !syncing}
-				<div class="scan-menu">
-					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 1} onclick={() => { scanDays = 1; scanMenuOpen = false; syncOrders(1); }}>1 Day</button>
-					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 7} onclick={() => { scanDays = 7; scanMenuOpen = false; syncOrders(7); }}>7 Days</button>
-					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 30} onclick={() => { scanDays = 30; scanMenuOpen = false; syncOrders(30); }}>30 Days</button>
-					<button class="btn-outline btn-sm scan-btn" class:active={scanDays === null} onclick={() => { scanDays = null; scanMenuOpen = false; syncOrders(null); }}>All</button>
-				</div>
+				{#if canRefresh}
+					<div class="scan-menu">
+						<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 1} onclick={() => { scanDays = 1; scanMenuOpen = false; syncOrders(1); }}>1 Day</button>
+						<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 7} onclick={() => { scanDays = 7; scanMenuOpen = false; syncOrders(7); }}>7 Days</button>
+						<button class="btn-outline btn-sm scan-btn" class:active={scanDays === 30} onclick={() => { scanDays = 30; scanMenuOpen = false; syncOrders(30); }}>30 Days</button>
+						<button class="btn-outline btn-sm scan-btn" class:active={scanDays === null} onclick={() => { scanDays = null; scanMenuOpen = false; syncOrders(null); }}>All</button>
+					</div>
+				{:else}
+					<div class="scan-advisory" role="alert">
+						<p>
+							Refresh scans every order event and asks your signer to decrypt each one. A NIP-07 browser extension handles this silently. Other signers may prompt for every event or refuse the bulk decryption entirely.
+						</p>
+						<p>
+							Sign in with a NIP-07 browser extension to use Refresh, or use <strong>Fetch by ID</strong> to pull specific orders from your payment history.
+						</p>
+						<div class="scan-advisory-actions">
+							<button class="btn-outline btn-sm" onclick={() => { scanMenuOpen = false; fetchByIdOpen = true; }}>Use Fetch by ID</button>
+							<button class="btn-outline btn-sm" onclick={() => (scanMenuOpen = false)}>Dismiss</button>
+						</div>
+					</div>
+				{/if}
 			{/if}
 
 			<div class="main-content">
@@ -3799,6 +3815,29 @@ Order 9f1a3c5e7b2d4f6  ·  12,800 sats"
 		border-color: var(--color-text);
 	}
 
+	.scan-advisory {
+		padding: var(--space-3) var(--space-6);
+		border-bottom: 1px solid var(--color-border);
+		background: var(--color-bg);
+		flex-shrink: 0;
+		font-size: var(--font-sm);
+		color: var(--color-text-muted);
+	}
+
+	.scan-advisory p {
+		margin: 0 0 var(--space-2);
+	}
+
+	.scan-advisory p:last-of-type {
+		margin-bottom: var(--space-3);
+	}
+
+	.scan-advisory-actions {
+		display: flex;
+		gap: var(--space-2);
+		flex-wrap: wrap;
+	}
+
 	.fetch-by-id-panel {
 		border: 1px solid var(--color-border);
 		border-radius: var(--radius-sm);
@@ -5302,6 +5341,10 @@ Order 9f1a3c5e7b2d4f6  ·  12,800 sats"
 			justify-content: center;
 			padding-left: var(--space-2) !important;
 			padding-right: var(--space-2) !important;
+		}
+
+		.scan-advisory {
+			padding: var(--space-3) var(--space-4);
 		}
 
 		.stat-grid {

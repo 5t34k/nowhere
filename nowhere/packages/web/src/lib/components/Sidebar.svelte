@@ -35,6 +35,7 @@
 	let { activePanel, onNavigate, onImport, onReset, panels = defaultPanels, resetLabel = 'Reset All', importLabel = 'Import Store', mobileShowPreview = false, onTogglePreview, siteType = '', beta = false }: Props = $props();
 
 	import { getContext } from 'svelte';
+	import SignInChip from '$lib/components/SignInChip.svelte';
 
 	interface SidebarNav {
 		homeHref?: string;
@@ -77,7 +78,7 @@
 			<span class="logo-type">{siteType}</span>
 		{/if}
 		{#if nav.getApp}
-			<a href={nav.getApp} class="get-app">Get Nowhere App</a>
+			<a href={nav.getApp} class="get-app">Get App</a>
 		{/if}
 	</div>
 
@@ -95,6 +96,7 @@
 	</div>
 
 	<div class="sidebar-footer">
+		<SignInChip variant="inline" />
 		{#if onImport}
 			<button class="footer-btn" onclick={onImport}>{importLabel}</button>
 		{/if}
@@ -119,7 +121,7 @@
 				<span class="mobile-logo-type">{siteType}</span>
 			{/if}
 			{#if nav.getApp}
-				<a href={nav.getApp} class="get-app">Get Nowhere App</a>
+				<a href={nav.getApp} class="get-app">Get App</a>
 			{/if}
 		</div>
 		<div class="mobile-bar-actions">
@@ -133,6 +135,7 @@
 					</button>
 				</div>
 			{/if}
+			<SignInChip variant="icon" />
 			<button class="mobile-overflow-btn" onclick={() => (showOverflow = !showOverflow)} aria-label="More options">
 				<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
 			</button>

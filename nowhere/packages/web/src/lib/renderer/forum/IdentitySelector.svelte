@@ -63,7 +63,7 @@
 				<div class="identity-dropdown-actions">
 					{#if identityMode !== 2}
 						<button class="identity-action-btn connect" onclick={onConnectNip07}>
-							Sign in with Extension
+							Sign in with Nostr
 						</button>
 					{/if}
 					{#if identityMode === 1 || identityMode === 2}
@@ -83,7 +83,7 @@
 				<div class="identity-dropdown-status">
 					{#if isExtension}
 						<span class="identity-status-dot connected"></span>
-						Signed with extension
+						Signed in
 					{:else}
 						<span class="identity-status-dot anon"></span>
 						Anonymous session

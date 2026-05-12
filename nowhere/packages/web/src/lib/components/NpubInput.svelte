@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { generateSecretKey, getPublicKey } from 'nostr-tools/pure';
+	import { activeSigner } from '$lib/nostr/signer';
 	import HintIcon from './HintIcon.svelte';
 
 	interface Props {
@@ -130,6 +131,23 @@
 		onGenerate?.();
 	}
 
+	function useSignedInNpub() {
+		const pkHex = $activeSigner?.pubkey;
+		if (!pkHex) return;
+		const pkBytes = hexToBytes(pkHex);
+		const b64 = bytesToBase64url(pkBytes);
+		const npub = bytesToBech32(pkBytes, 'npub');
+
+		inputValue = npub;
+		format = 'npub';
+		error = '';
+		lastEmitted = b64;
+		onUpdate(b64);
+
+		generatedNsec = '';
+		nsecCopied = false;
+	}
+
 	function copyNsec() {
 		navigator.clipboard.writeText(generatedNsec);
 		nsecCopied = true;
@@ -257,7 +275,12 @@
 <div class="npub-input">
 	<div class="label-row">
 		<label for="pubkey-input">Enter npub {#if required}<span class="required">*</span>{/if} <HintIcon tip="Your Nostr public key. Used to decrypt order details, verify your store, and display your profile data." /></label>
-		<button type="button" class="generate-btn" onclick={generateKeypair}>Generate npub</button>
+		<div class="btn-group">
+			{#if $activeSigner?.pubkey}
+				<button type="button" class="generate-btn" onclick={useSignedInNpub}>Use signed-in npub</button>
+			{/if}
+			<button type="button" class="generate-btn" onclick={generateKeypair}>Generate npub</button>
+		</div>
 	</div>
 	<input
 		id="pubkey-input"
@@ -307,6 +330,12 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
+		gap: var(--space-2);
+	}
+
+	.btn-group {
+		display: flex;
+		gap: var(--space-1);
 	}
 
 	label {

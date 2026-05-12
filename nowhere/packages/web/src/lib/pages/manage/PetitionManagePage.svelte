@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { decode, decryptFragment, base64urlToHex } from '@nowhere/codec';
 	import type { PetitionData, Tag } from '@nowhere/codec';
-	import { hasNostrExtension, hasNip44Support, getPublicKey, nip44Decrypt } from '$lib/nostr/nip07.js';
+	import { hasNip44Support, ensureSignedIn, signOut as signOutNostr, nip44Decrypt } from '$lib/nostr/nip07.js';
 	import { fetchEvents, getPetitionRelays } from '$lib/renderer/nostr/relay-pool.js';
 	import { NOWHERE_DTAG_PREFIX } from '$lib/renderer/nostr/constants.js';
 	import { countLeadingZeroBits } from '$lib/renderer/nostr/pow.js';
@@ -179,20 +179,18 @@
 		petitionDecryptPassword = '';
 		petitionDecryptError = '';
 		petitionPendingFragment = '';
+		void signOutNostr();
 	}
 
 	async function connectNip07() {
 		connectError = '';
-		if (!hasNostrExtension()) {
-			connectError = 'No Nostr signing extension found. Install nos2x, Alby, or similar.';
-			return;
-		}
-		if (!hasNip44Support()) {
-			connectError = 'Your Nostr extension does not support NIP-44 encryption.';
-			return;
-		}
 		try {
-			sellerPubkey = await getPublicKey();
+			sellerPubkey = await ensureSignedIn();
+			if (!hasNip44Support()) {
+				connectError = 'Your signer does not support NIP-44 encryption. Try a different extension or remote signer.';
+				sellerPubkey = '';
+				return;
+			}
 			connected = true;
 		} catch (e) {
 			connectError = `Connection failed: ${e instanceof Error ? e.message : String(e)}`;
@@ -536,8 +534,8 @@
 			<span class="signin-brand-mark">nowhere</span>
 			<span class="signin-brand-type">Petition</span>
 		</div>
-		<h1 class="signin-heading">Connect your<br><em>extension.</em></h1>
-		<button class="signin-btn" onclick={connectNip07}>Connect Extension →</button>
+		<h1 class="signin-heading">Sign in<br><em>with Nostr.</em></h1>
+		<button class="signin-btn" onclick={connectNip07}>Sign in →</button>
 		{#if connectError}
 			<p class="signin-error">{connectError}</p>
 		{/if}

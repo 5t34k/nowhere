@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { EncodeResult } from '@nowhere/codec';
 	import { encryptFragment, base64urlToHex } from '@nowhere/codec';
-	import { hasNostrExtension, signFragment } from '$lib/nostr/nip07.js';
+	import { ensureSignedIn, signFragment } from '$lib/nostr/nip07.js';
 	import HintIcon from './HintIcon.svelte';
 	import QRCode from 'qrcode';
 	import { RENDERER_ORIGIN } from '$lib/config.js';
@@ -131,21 +131,19 @@
 		signing = true;
 		signError = '';
 		try {
+			await ensureSignedIn();
 			const { signedFragment: sf, signerPubkey } = await signFragment(fragment);
 			if (expectedPubkey && signerPubkey !== base64urlToHex(expectedPubkey)) {
-				signError = 'Wrong key — the signing extension used a different key than the one in your store. Switch to the correct key in your extension and try again.';
+				signError = 'Wrong key — your signer used a different key than the one in your store. Switch to the correct key and try again.';
 				return;
 			}
 			signedFragment = sf;
 			isSigned = true;
 			urlRevealed = true;
-			// If encryption was applied before signing, the encrypted content is unsigned — clear it
-			// so the user re-encrypts with the signed fragment included
 			if (encryptedFragment) {
 				onRemoveEncryption();
 			}
 		} catch {
-			// Signing failed/rejected — fall back to unsigned reveal
 			signedFragment = '';
 			isSigned = false;
 			urlRevealed = true;
@@ -429,8 +427,7 @@
 						type="button"
 						class="reveal-btn reveal-btn-sign"
 						onclick={signAndReveal}
-						disabled={signing || !hasNostrExtension()}
-						title={!hasNostrExtension() ? 'Nostr signing extension required' : ''}
+						disabled={signing}
 					>
 						{signing ? 'Signing...' : 'Sign & Reveal Link'}
 					</button>
@@ -440,8 +437,6 @@
 						<strong>Signature failed</strong>
 						<p>{signError}</p>
 					</div>
-				{:else if !hasNostrExtension()}
-					<p class="sign-hint">Install a Nostr signing extension to sign your store.</p>
 				{/if}
 			</div>
 		{:else}

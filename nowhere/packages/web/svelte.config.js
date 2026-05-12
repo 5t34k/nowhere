@@ -13,7 +13,7 @@ const config = {
 				'script-src': ['self'],
 				'style-src': ['self', 'unsafe-inline'],
 				'img-src': ['self', 'https:', 'data:', 'blob:'],
-				'connect-src': ['self', 'wss:', 'https:'],
+				'connect-src': ['self', 'wss:', 'https:', 'ws://localhost:*', 'ws://127.0.0.1:*'],
 				'font-src': ['self'],
 				'object-src': ['none'],
 				'base-uri': ['self'],

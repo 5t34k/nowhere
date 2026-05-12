@@ -4,6 +4,8 @@
 	import { publishSignature, type SigningPhase } from '$lib/renderer/nostr/petition-signing.js';
 	import { getPetitionRelays } from '$lib/renderer/nostr/relay-pool.js';
 	import { siteFragment } from '$lib/renderer/stores/site-data.js';
+	import { getActiveSigner } from '$lib/nostr/signer.js';
+	import { signOut as activeSignOut } from '$lib/nostr/nip07.js';
 
 	interface Props {
 		data: PetitionData;
@@ -40,6 +42,10 @@
 	let signingPhase = $state<SigningPhase>('encrypting');
 	let useNip07 = $state(false);
 	let errorMsg = $state('');
+	// Captured at method choice (not per publish) so retries after a
+	// transient failure still honour the original intent: if the user wasn't
+	// signed in beforehand, sign them out after a successful publish.
+	let wasSignedInBefore = $state(false);
 
 	let fieldName = $state('');
 	let fieldEmail = $state('');
@@ -57,6 +63,9 @@
 
 	function chooseMethod(nip07: boolean) {
 		useNip07 = nip07;
+		if (nip07) {
+			wasSignedInBefore = !!getActiveSigner();
+		}
 		step = 'form';
 	}
 
@@ -111,6 +120,11 @@
 				signingPhase = phase;
 			});
 			step = 'done';
+			if (useNip07 && !wasSignedInBefore) {
+				// Drive-by signer — clear the session so no persistent
+				// connection is left on the device.
+				void activeSignOut();
+			}
 			onSigned?.();
 		} catch (e) {
 			errorMsg = e instanceof Error ? e.message : 'Failed to sign petition';
@@ -118,17 +132,14 @@
 		}
 	}
 
-	const hasNostr = $derived(typeof window !== 'undefined' && !!(window as any).nostr);
 </script>
 
 <div class="petition-sign-form">
 	{#if step === 'choose'}
 		<div class="petition-sign-methods">
-			{#if hasNostr}
-				<button class="petition-sign-method-btn" onclick={() => chooseMethod(true)}>
-					Sign with Nostr identity
-				</button>
-			{/if}
+			<button class="petition-sign-method-btn" onclick={() => chooseMethod(true)}>
+				Sign with Nostr identity
+			</button>
 			<button class="petition-sign-method-btn" onclick={() => chooseMethod(false)}>
 				Sign anonymously
 			</button>

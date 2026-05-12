@@ -19,7 +19,7 @@ export interface StatusPayload {
 
 /**
  * Publish a store status/inventory event.
- * Uses NIP-07 extension for signing and encryption.
+ * Uses the active Nostr signer (NIP-07 extension or NIP-46 remote signer) for signing and encryption.
  * The event is encrypted to the inventory keypair derived from the store fragment.
  */
 export async function publishStatus(

@@ -3,8 +3,16 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { browser } from '$app/environment';
 	import { onMount, setContext } from 'svelte';
+	import { installMultiTabSync } from '$lib/nostr/signer';
+	import { restoreActiveSigner } from '$lib/nostr/nip46-signer';
+	import SignInModal from '$lib/components/SignInModal.svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		void restoreActiveSigner();
+		return installMultiTabSync(() => {});
+	});
 
 	onMount(() => {
 		if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
@@ -37,3 +45,4 @@
 </svelte:head>
 
 {@render children()}
+<SignInModal />

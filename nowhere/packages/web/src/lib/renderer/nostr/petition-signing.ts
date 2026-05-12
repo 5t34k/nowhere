@@ -4,6 +4,7 @@ import { publishToRelays, countEvents } from './relay-pool.js';
 import { NOWHERE_DTAG_PREFIX } from './constants.js';
 import { applyPoW } from './pow.js';
 import type { UnsignedEvent } from './pow.js';
+import { ensureSignedIn, signEvent as activeSignEvent, nip44Encrypt as activeNip44Encrypt } from '$lib/nostr/nip07.js';
 
 export const POW_DIFFICULTY = 20;
 
@@ -53,21 +54,11 @@ export async function publishSignature(
 	let pk: string;
 
 	if (useNip07) {
-		// Use NIP-07 extension
-		if (!window.nostr) throw new Error('No Nostr signing extension found');
-		pk = await window.nostr.getPublicKey();
+		pk = await ensureSignedIn();
 
 		onPhase?.('encrypting');
+		const content = await activeNip44Encrypt(creatorPubkeyHex, JSON.stringify(payload));
 
-		// Encrypt with NIP-07 NIP-44
-		let content: string;
-		if (window.nostr.nip44) {
-			content = await window.nostr.nip44.encrypt(creatorPubkeyHex, JSON.stringify(payload));
-		} else {
-			throw new Error('NIP-44 not supported by extension');
-		}
-
-		// Build event, apply PoW, then sign with extension
 		const unsigned: UnsignedEvent = {
 			kind: 30078,
 			created_at: Math.floor(Date.now() / 1000),
@@ -78,7 +69,7 @@ export async function publishSignature(
 
 		onPhase?.('pow');
 		const withPow = await applyPoW(unsigned, POW_DIFFICULTY);
-		const signed = await window.nostr.signEvent(withPow);
+		const signed = await activeSignEvent(withPow);
 		onPhase?.('publishing');
 		await publishToRelays(signed, relays, 'petition signature');
 	} else {
