@@ -1,7 +1,10 @@
 // Contact method platform definitions
 // Code: single char stored in tag value. Name: display label.
-// Tag 'j' value format: entries separated by ',', each entry is code + handle
+// Tag 'j' value format: entries separated by ',', each entry is code + handle.
+// Custom entries ('*') are code + customName + ':' + handle.
 // Example: "P+15551234567,Tdurov,M@user:matrix.org"
+// ',' ':' and '\' typed into a name or handle are backslash-escaped so they
+// don't collide with the entry/field delimiters (see escapeField/unescapeField).
 // Icons: monochrome SVGs using currentColor, 14x14 display in 24x24 viewBox
 // Brand icons sourced from Simple Icons (simpleicons.org) — CC0 licence
 
@@ -93,22 +96,66 @@ export interface ContactEntry {
 	customName?: string; // only for code '*'
 }
 
+// ',' separates entries and ':' separates a custom entry's name from its
+// handle. Escape those (and '\' itself) inside field values so user-typed
+// delimiters survive the parse/serialize round-trip instead of corrupting the
+// structure — a stray comma used to spawn a phantom entry from the text after it.
+function escapeField(s: string): string {
+	return s.replace(/\\/g, '\\\\').replace(/,/g, '\\,').replace(/:/g, '\\:');
+}
+
+function unescapeField(s: string): string {
+	return s.replace(/\\([\s\S])/g, '$1');
+}
+
+// Index of the first unescaped occurrence of `delim`, or -1.
+function indexOfUnescaped(s: string, delim: string): number {
+	for (let i = 0; i < s.length; i++) {
+		if (s[i] === '\\') { i++; continue; }
+		if (s[i] === delim) return i;
+	}
+	return -1;
+}
+
+// Split on unescaped `delim`, keeping escape sequences intact within each part.
+function splitUnescaped(s: string, delim: string): string[] {
+	const parts: string[] = [];
+	let cur = '';
+	for (let i = 0; i < s.length; i++) {
+		const ch = s[i];
+		if (ch === '\\' && i + 1 < s.length) {
+			cur += ch + s[i + 1];
+			i++;
+		} else if (ch === delim) {
+			parts.push(cur);
+			cur = '';
+		} else {
+			cur += ch;
+		}
+	}
+	parts.push(cur);
+	return parts;
+}
+
 export function parseContacts(raw: string): ContactEntry[] {
 	if (!raw) return [];
-	return raw
-		.split(',')
+	return splitUnescaped(raw, ',')
 		.filter(Boolean)
 		.map((entry) => {
 			const code = entry[0];
 			if (code === CUSTOM_CODE) {
 				const rest = entry.slice(1);
-				const colonIdx = rest.indexOf(':');
+				const colonIdx = indexOfUnescaped(rest, ':');
 				if (colonIdx >= 0) {
-					return { code, customName: rest.slice(0, colonIdx), handle: rest.slice(colonIdx + 1) };
+					return {
+						code,
+						customName: unescapeField(rest.slice(0, colonIdx)),
+						handle: unescapeField(rest.slice(colonIdx + 1))
+					};
 				}
-				return { code, customName: rest, handle: '' };
+				return { code, customName: unescapeField(rest), handle: '' };
 			}
-			return { code, handle: entry.slice(1) };
+			return { code, handle: unescapeField(entry.slice(1)) };
 		});
 }
 
@@ -116,9 +163,9 @@ export function serializeContacts(contacts: ContactEntry[]): string {
 	return contacts
 		.map((c) => {
 			if (c.code === CUSTOM_CODE) {
-				return c.code + (c.customName || '') + ':' + c.handle;
+				return c.code + escapeField(c.customName || '') + ':' + escapeField(c.handle);
 			}
-			return c.code + c.handle;
+			return c.code + escapeField(c.handle);
 		})
 		.join(',');
 }

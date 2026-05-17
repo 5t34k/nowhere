@@ -4,7 +4,7 @@
 	import { siteData, siteSigned } from '$lib/renderer/stores/site-data.js';
 	import { computeVerification } from '$lib/renderer/nostr/verify.js';
 	import { renderMarkdown } from '$lib/renderer/utils/markdown-sanitize.js';
-	import { sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
+	import { sanitizeImageUrl, sanitizeUrl } from '$lib/renderer/utils/sanitize-url.js';
 	import QRCode from 'qrcode';
 	import { parseContacts, platformByCode } from '$lib/contacts.js';
 	import { parseTipMethods } from '$lib/tips.js';
@@ -406,7 +406,7 @@
 					<div class="footer-contact-layer footer-contact-detail-layer" class:visible={openContactIdx === i}>
 						<button class="footer-contact-name" onclick={() => toggleContact(i)}>{item.label}</button>
 						{#if item.href}
-							<a class="footer-contact-handle" href={item.href} target="_blank" rel="noopener noreferrer">{item.detail}</a>
+							<a class="footer-contact-handle" href={sanitizeUrl(item.href)} target="_blank" rel="noopener noreferrer">{item.detail}</a>
 						{:else if item.copyable}
 							<span class="footer-contact-handle footer-contact-copy" role="button" tabindex="0" onclick={() => copyContact(item.detail)} onkeydown={(e) => { if (e.key === 'Enter') copyContact(item.detail); }}>{contactCopied ? 'Copied!' : item.detail}</span>
 						{:else}
