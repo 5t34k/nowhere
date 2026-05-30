@@ -22,8 +22,30 @@
 	let overlayText = $state('');
 	let overlayVisible = $state(true);
 	let overlayFading = $state(false);
-	let view = $state<'main' | 'build' | 'manage'>('main');
+	let view = $state<'main' | 'build' | 'manage' | 'saved'>('main');
 	let direction = $state<'forward' | 'back'>('forward');
+
+	// Saved sites — persisted list of nowhere links the user wants to keep handy
+	interface SavedSite { id: string; nickname: string; url: string; }
+	const SAVED_KEY = 'nowhere-saved-sites';
+	let savedSites = $state<SavedSite[]>([]);
+	let showAddForm = $state(false);
+	let newNickname = $state('');
+	let newUrl = $state('');
+	let addError = $state(false);
+	let confirmingDeleteId = $state<string | null>(null);
+	let nicknameInputEl = $state<HTMLInputElement | null>(null);
+	let urlInputEl = $state<HTMLInputElement | null>(null);
+
+	// Drag-to-reorder (pointer based, works on touch + mouse)
+	let listEl = $state<HTMLUListElement | null>(null);
+	let dragId = $state<string | null>(null);
+	let dragOrigIndex = $state(-1);
+	let dragTarget = $state(-1);
+	let dragDy = $state(0);
+	let draggedHeight = $state(0);
+	let dragGrabY = 0;
+	let dragSnapshot: { top: number; height: number }[] = [];
 	let scanning = $state(false);
 	let cameraError = $state<'permission' | 'unsupported' | null>(null);
 
@@ -320,6 +342,191 @@
 		if (e.key === 'Enter') openLink();
 	}
 
+	// --- Saved sites ---
+
+	function loadSavedSites() {
+		try {
+			const raw = localStorage.getItem(SAVED_KEY);
+			if (!raw) return;
+			const parsed = JSON.parse(raw);
+			if (Array.isArray(parsed)) {
+				savedSites = parsed.filter(
+					(s): s is SavedSite =>
+						s && typeof s.id === 'string' && typeof s.url === 'string' && typeof s.nickname === 'string'
+				);
+			}
+		} catch { /* corrupt or unavailable storage — start empty */ }
+	}
+
+	function persistSavedSites() {
+		try {
+			localStorage.setItem(SAVED_KEY, JSON.stringify(savedSites));
+		} catch { /* storage full or unavailable — keep in-memory copy */ }
+	}
+
+	function newId(): string {
+		if (typeof crypto !== 'undefined' && crypto.randomUUID) return crypto.randomUUID();
+		return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+	}
+
+	function toggleAddForm() {
+		showAddForm = !showAddForm;
+		addError = false;
+		if (!showAddForm) { newNickname = ''; newUrl = ''; }
+	}
+
+	function addSavedSite() {
+		const url = newUrl.trim();
+		if (!url) { addError = true; urlInputEl?.focus(); return; }
+		const nickname = newNickname.trim();
+		savedSites = [...savedSites, { id: newId(), nickname, url }];
+		persistSavedSites();
+		newNickname = '';
+		newUrl = '';
+		addError = false;
+		showAddForm = false;
+	}
+
+	function addFormKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') addSavedSite();
+		else if (e.key === 'Escape') toggleAddForm();
+	}
+
+	function removeSavedSite(id: string) {
+		savedSites = savedSites.filter((s) => s.id !== id);
+		persistSavedSites();
+		confirmingDeleteId = null;
+	}
+
+	// Turn a stored link into the same /s#… navigation the manual input uses.
+	function launchSavedSite(site: SavedSite) {
+		const val = site.url.trim();
+		if (!val) return;
+		try {
+			const url = new URL(val);
+			goto('/s' + url.hash);
+		} catch {
+			const frag = val.startsWith('#') ? val : '#' + val;
+			goto('/s' + frag);
+		}
+	}
+
+	// Compact, readable form of a stored URL for the list's secondary line.
+	function displayUrl(raw: string): string {
+		let s = raw.trim();
+		try {
+			const u = new URL(s);
+			s = u.host + u.pathname.replace(/\/$/, '') + u.hash;
+		} catch { /* not a full URL — show as entered */ }
+		return s.length > 40 ? s.slice(0, 39) + '…' : s;
+	}
+
+	// Snapshot each row's position so we can compute reorder targets during a drag.
+	function snapshotRows(): { top: number; height: number }[] {
+		if (!listEl) return [];
+		return Array.from(listEl.querySelectorAll<HTMLElement>('.saved-item')).map((el) => {
+			const r = el.getBoundingClientRect();
+			return { top: r.top, height: r.height };
+		});
+	}
+
+	// Visual transform for row `i` while a drag is in progress.
+	function itemTransform(i: number): string {
+		if (dragId === null) return '';
+		if (i === dragOrigIndex) return `translateY(${dragDy}px)`;
+		if (dragTarget > dragOrigIndex && i > dragOrigIndex && i <= dragTarget) return `translateY(${-draggedHeight}px)`;
+		if (dragTarget < dragOrigIndex && i >= dragTarget && i < dragOrigIndex) return `translateY(${draggedHeight}px)`;
+		return '';
+	}
+
+	function onDragPointerDown(e: PointerEvent, index: number) {
+		if (savedSites.length < 2) return;
+		e.preventDefault();
+		dragSnapshot = snapshotRows();
+		if (!dragSnapshot[index]) return;
+		dragOrigIndex = index;
+		dragTarget = index;
+		draggedHeight = dragSnapshot[index].height;
+		dragGrabY = e.clientY;
+		dragDy = 0;
+		dragId = savedSites[index].id;
+		confirmingDeleteId = null;
+		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+	}
+
+	function onDragPointerMove(e: PointerEvent) {
+		if (dragId === null) return;
+		dragDy = e.clientY - dragGrabY;
+		const draggedCenter = dragSnapshot[dragOrigIndex].top + dragDy + draggedHeight / 2;
+		let target = dragOrigIndex;
+		if (dragDy > 0) {
+			for (let i = dragOrigIndex + 1; i < dragSnapshot.length; i++) {
+				if (draggedCenter > dragSnapshot[i].top + dragSnapshot[i].height / 2) target = i;
+				else break;
+			}
+		} else if (dragDy < 0) {
+			for (let i = dragOrigIndex - 1; i >= 0; i--) {
+				if (draggedCenter < dragSnapshot[i].top + dragSnapshot[i].height / 2) target = i;
+				else break;
+			}
+		}
+		dragTarget = target;
+	}
+
+	function endDrag() {
+		if (dragId === null) return;
+		const from = dragOrigIndex;
+		const to = dragTarget;
+		if (to >= 0 && to !== from) {
+			const arr = [...savedSites];
+			const [moved] = arr.splice(from, 1);
+			arr.splice(to, 0, moved);
+			savedSites = arr;
+			persistSavedSites();
+		}
+		dragId = null;
+		dragOrigIndex = -1;
+		dragTarget = -1;
+		dragDy = 0;
+		draggedHeight = 0;
+	}
+
+	// Keyboard reorder — ArrowUp / ArrowDown on a focused handle.
+	function moveItem(index: number, dir: -1 | 1) {
+		const to = index + dir;
+		if (to < 0 || to >= savedSites.length) return;
+		const arr = [...savedSites];
+		const [moved] = arr.splice(index, 1);
+		arr.splice(to, 0, moved);
+		savedSites = arr;
+		persistSavedSites();
+	}
+
+	function dragHandleKeydown(e: KeyboardEvent, index: number) {
+		if (e.key === 'ArrowUp') { e.preventDefault(); moveItem(index, -1); }
+		else if (e.key === 'ArrowDown') { e.preventDefault(); moveItem(index, 1); }
+	}
+
+	// Reset transient saved-panel state whenever we leave it.
+	$effect(() => {
+		if (view !== 'saved') {
+			showAddForm = false;
+			confirmingDeleteId = null;
+			newNickname = '';
+			newUrl = '';
+			addError = false;
+			dragId = null;
+			dragOrigIndex = -1;
+			dragTarget = -1;
+			dragDy = 0;
+		}
+	});
+
+	// Focus the nickname field when the add form opens.
+	$effect(() => {
+		if (showAddForm) nicknameInputEl?.focus();
+	});
+
 	function dismissOverlay() {
 		overlayFading = true;
 		setTimeout(() => { overlayVisible = false; }, 400);
@@ -345,6 +552,8 @@
 		   left dataset.theme in a different state. Falls back to OS preference. */
 		const saved = localStorage.getItem('nowhere-theme');
 		if (saved === 'light' || saved === 'dark') html.dataset.theme = saved;
+
+		loadSavedSites();
 
 		function isDark() {
 			return html.dataset.theme === 'dark' ||
@@ -435,9 +644,14 @@
 	{:else}
 		<a href="https://hostednowhere.com" class="nav-mark">nowhere</a>
 	{/if}
-	{#if view !== 'manage'}
-		<button class="nav-link" onclick={() => { direction = 'forward'; view = 'manage'; }}>manage</button>
-	{/if}
+	<div class="nav-right">
+		{#if view !== 'saved'}
+			<button class="nav-link" onclick={() => { direction = 'forward'; view = 'saved'; }}>saved sites</button>
+		{/if}
+		{#if view !== 'manage'}
+			<button class="nav-link" onclick={() => { direction = 'forward'; view = 'manage'; }}>manage</button>
+		{/if}
+	</div>
 </nav>
 
 <button class="theme-corner" id="theme-toggle" title="Toggle theme">{themeLabel}</button>
@@ -520,6 +734,112 @@
 			</div>
 		</div>
 
+		<!-- SAVED PANEL -->
+		<div class="panel panel-saved" class:visible={view === 'saved'} aria-hidden={view !== 'saved'}>
+			<div class="composition saved-composition">
+				<div class="saved-head">
+					<h2 class="saved-heading">saved sites</h2>
+					<button
+						class="saved-add"
+						onclick={toggleAddForm}
+						aria-label={showAddForm ? 'Cancel adding a site' : 'Add a site'}
+						aria-expanded={showAddForm}
+						tabindex={view === 'saved' ? 0 : -1}
+					>{showAddForm ? '×' : '+'}</button>
+				</div>
+
+				{#if showAddForm}
+					<div class="saved-form">
+						<input
+							class="saved-input"
+							type="text"
+							placeholder="nickname"
+							autocomplete="off"
+							autocorrect="off"
+							spellcheck="false"
+							bind:this={nicknameInputEl}
+							bind:value={newNickname}
+							onkeydown={addFormKeydown}
+						/>
+						<input
+							class="saved-input"
+							class:error={addError && !newUrl.trim()}
+							type="url"
+							inputmode="url"
+							enterkeyhint="done"
+							placeholder="nowhr.xyz/s#…"
+							autocomplete="off"
+							autocorrect="off"
+							spellcheck="false"
+							bind:this={urlInputEl}
+							bind:value={newUrl}
+							onkeydown={addFormKeydown}
+						/>
+						<button class="saved-save" onclick={addSavedSite}>save</button>
+					</div>
+				{/if}
+
+				<div class="saved-scroll">
+				{#if savedSites.length === 0}
+					<p class="saved-empty">No saved sites yet. Tap <span class="saved-empty-plus">+</span> to add one.</p>
+				{:else}
+					<ul class="saved-list" bind:this={listEl}>
+						{#each savedSites as site, i (site.id)}
+							<li class="saved-item" class:dragging={site.id === dragId} style:transform={itemTransform(i)}>
+								{#if confirmingDeleteId === site.id}
+									<div class="saved-confirm">
+										<span class="saved-confirm-text">Remove {site.nickname || displayUrl(site.url)}?</span>
+										<button class="saved-confirm-yes" onclick={() => removeSavedSite(site.id)}>remove</button>
+										<button class="saved-confirm-no" onclick={() => confirmingDeleteId = null}>cancel</button>
+									</div>
+								{:else}
+									{#if savedSites.length > 1}
+										<button
+											class="saved-handle"
+											aria-label="Reorder {site.nickname || 'site'} (use arrow keys)"
+											tabindex={view === 'saved' ? 0 : -1}
+											onpointerdown={(e) => onDragPointerDown(e, i)}
+											onpointermove={onDragPointerMove}
+											onpointerup={endDrag}
+											onpointercancel={endDrag}
+											onkeydown={(e) => dragHandleKeydown(e, i)}
+										>
+											<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+												<circle cx="9" cy="6" r="1.3" /><circle cx="15" cy="6" r="1.3" />
+												<circle cx="9" cy="12" r="1.3" /><circle cx="15" cy="12" r="1.3" />
+												<circle cx="9" cy="18" r="1.3" /><circle cx="15" cy="18" r="1.3" />
+											</svg>
+										</button>
+									{/if}
+									<button
+										class="saved-launch"
+										onclick={() => launchSavedSite(site)}
+										tabindex={view === 'saved' ? 0 : -1}
+									>
+										<span class="saved-name">{site.nickname || displayUrl(site.url)}</span>
+										{#if site.nickname}<span class="saved-url">{displayUrl(site.url)}</span>{/if}
+									</button>
+									<button
+										class="saved-trash"
+										onclick={() => confirmingDeleteId = site.id}
+										aria-label="Delete {site.nickname || 'site'}"
+										tabindex={view === 'saved' ? 0 : -1}
+									>
+										<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+											<path d="M4 7h16" />
+											<path d="M10 4h4M10 11v6M14 11v6" />
+											<path d="M6 7l1 13h10l1-13" />
+										</svg>
+									</button>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+				{/if}
+				</div>
+			</div>
+		</div>
+
 	</div>
 
 	<!-- CAMERA AREA -->
@@ -591,7 +911,7 @@
 	</div>
 {/if}
 
-<footer class="footer" class:hidden={scanning}>
+<footer class="footer" class:hidden={scanning || view === 'saved'}>
 	<span>Hosted <a href="https://hostednowhere.com" class="footer-link">nowhere</a>. Present everywhere.</span>
 	{#if instanceHost}
 		<span>nowhere via <a href="https://{instanceHost}" class="footer-host">{instanceHost}</a></span>
@@ -1173,6 +1493,272 @@
 	}
 
 	.manage-link:hover { color: var(--ink); }
+
+	/* NAV RIGHT GROUP */
+	.nav-right {
+		display: flex;
+		align-items: center;
+		gap: clamp(0.9rem, 4vw, 1.5rem);
+	}
+
+	/* SAVED PANEL */
+	.panel-saved {
+		pointer-events: none;
+		align-items: stretch;
+		overflow: hidden;
+	}
+	.panel-saved.visible { pointer-events: auto; }
+
+	.saved-composition {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		padding-top: clamp(1.5rem, 6vh, 3.5rem);
+	}
+
+	/* heading + add controls stay fixed; only this region scrolls */
+	.saved-scroll {
+		flex: 1;
+		min-height: 0;
+		overflow: hidden auto;
+		-webkit-overflow-scrolling: touch;
+		padding-bottom: clamp(2rem, 6vh, 3.5rem);
+	}
+
+	/* entrance — mirrors the manage panel's staggered slide-in */
+	.panel-saved .saved-head,
+	.panel-saved .saved-empty,
+	.panel-saved .saved-list {
+		opacity: 0;
+		transform: translateX(70px);
+	}
+	.panel-saved.visible .saved-head {
+		opacity: 1;
+		transform: translateX(0);
+		transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) 200ms, opacity 0.35s ease 220ms;
+	}
+	.panel-saved.visible .saved-empty,
+	.panel-saved.visible .saved-list {
+		opacity: 1;
+		transform: translateX(0);
+		transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) 255ms, opacity 0.35s ease 275ms;
+	}
+
+	.saved-head {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-bottom: clamp(1.25rem, 3vh, 1.75rem);
+	}
+
+	.saved-heading {
+		font-size: clamp(1.5rem, 5vw, 2rem);
+		font-weight: 800;
+		letter-spacing: -0.03em;
+		line-height: 1;
+		color: var(--ink);
+	}
+
+	.saved-add {
+		font-family: var(--font);
+		font-size: 1.5rem;
+		line-height: 1;
+		color: var(--ink-35);
+		background: none;
+		border: none;
+		padding: 0.25rem 0.4rem;
+		margin: -0.25rem -0.4rem;
+		cursor: pointer;
+		transition: color 0.15s;
+	}
+	.saved-add:hover { color: var(--ink); }
+
+	.saved-form {
+		flex-shrink: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.85rem;
+		margin-bottom: clamp(1.5rem, 3.5vh, 2rem);
+		animation: saved-form-in 0.3s ease;
+	}
+
+	@keyframes saved-form-in {
+		from { opacity: 0; transform: translateY(-5px); }
+		to   { opacity: 1; transform: translateY(0); }
+	}
+
+	.saved-input {
+		width: 100%;
+		font-family: var(--font);
+		font-size: 1rem;
+		color: var(--ink);
+		background: none;
+		border: none;
+		border-bottom: 1px solid var(--ink-35);
+		outline: none;
+		padding: 0.25rem 0 0.55rem;
+		letter-spacing: 0.01em;
+		transition: border-color 0.2s;
+	}
+	.saved-input[type="url"] { font-family: var(--mono); }
+	.saved-input::placeholder { color: var(--ink-35); }
+	.saved-input:focus { border-bottom-color: var(--ink); }
+	.saved-input.error { border-bottom-color: rgba(200, 80, 80, 0.7); }
+
+	.saved-save {
+		align-self: flex-end;
+		font-family: var(--serif);
+		font-size: clamp(1rem, 2.5vw, 1.125rem);
+		color: var(--ink-60);
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		letter-spacing: 0.01em;
+		transition: color 0.15s;
+	}
+	.saved-save:hover { color: var(--ink); }
+
+	.saved-empty {
+		font-family: var(--serif);
+		font-size: clamp(0.9rem, 2.5vw, 1.0625rem);
+		color: var(--ink-35);
+		line-height: 1.6;
+	}
+	.saved-empty-plus { font-family: var(--font); color: var(--ink-60); }
+
+	.saved-list {
+		list-style: none;
+		display: flex;
+		flex-direction: column;
+		border-top: 1px solid var(--ink-15);
+	}
+
+	.saved-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		border-bottom: 1px solid var(--ink-15);
+		transition: transform 0.18s cubic-bezier(0.2, 0, 0, 1);
+	}
+
+	/* the row being dragged tracks the finger directly and floats above the rest */
+	.saved-item.dragging {
+		transition: none;
+		position: relative;
+		z-index: 5;
+		background: var(--bg);
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+	}
+
+	.saved-handle {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 40px;
+		margin-left: -0.45rem;
+		color: var(--ink-35);
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: grab;
+		touch-action: none;
+		transition: color 0.15s;
+	}
+	.saved-handle:hover { color: var(--ink-60); }
+	.saved-item.dragging .saved-handle { cursor: grabbing; color: var(--ink); }
+
+	.saved-launch {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.15rem;
+		align-items: flex-start;
+		text-align: left;
+		background: none;
+		border: none;
+		padding: 0.9rem 0;
+		cursor: pointer;
+	}
+
+	.saved-name {
+		max-width: 100%;
+		font-family: var(--font);
+		font-size: 1rem;
+		color: var(--ink);
+		letter-spacing: -0.01em;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		transition: color 0.15s;
+	}
+	.saved-launch:hover .saved-name { color: var(--ink-60); }
+
+	.saved-url {
+		max-width: 100%;
+		font-family: var(--mono);
+		font-size: 0.75rem;
+		color: var(--ink-35);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.saved-trash {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		margin-right: -0.5rem;
+		color: var(--ink-35);
+		background: none;
+		border: none;
+		cursor: pointer;
+		transition: color 0.15s;
+	}
+	.saved-trash:hover { color: var(--ink); }
+
+	.saved-confirm {
+		display: flex;
+		align-items: center;
+		gap: 0.85rem;
+		width: 100%;
+		padding: 0.9rem 0;
+	}
+
+	.saved-confirm-text {
+		flex: 1;
+		min-width: 0;
+		font-family: var(--serif);
+		font-size: 0.9375rem;
+		color: var(--ink-60);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.saved-confirm-yes,
+	.saved-confirm-no {
+		flex-shrink: 0;
+		font-family: var(--font);
+		font-size: 0.8125rem;
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		letter-spacing: 0.01em;
+		transition: color 0.15s;
+	}
+	.saved-confirm-yes { color: rgba(200, 80, 80, 0.85); }
+	.saved-confirm-yes:hover { color: rgb(200, 70, 70); }
+	.saved-confirm-no { color: var(--ink-35); }
+	.saved-confirm-no:hover { color: var(--ink); }
 
 	/* Version easter egg */
 	.version-backdrop {
