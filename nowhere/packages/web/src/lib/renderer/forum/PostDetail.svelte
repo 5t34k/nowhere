@@ -138,7 +138,7 @@
 	{:else if sortedReplies.length === 0}
 		<div class="reply-empty">No replies yet.</div>
 	{:else}
-		{#each sortedReplies as reply}
+		{#each sortedReplies as reply (reply.eventId)}
 			<div class="thread-reply" id="reply-{reply.eventId}">
 				<div class="thread-reply-sidebar">
 					<AuthorIdentity pubkey={reply.payload.p} {privacyMode} size={44} {profileRelays} {forumCache} {onOpenProfileCard} />

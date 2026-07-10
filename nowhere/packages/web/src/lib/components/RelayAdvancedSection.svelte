@@ -10,9 +10,10 @@
 		secondaryLabel?: string;
 		secondaryHint?: string;
 		showSecondary?: boolean;
+		alwaysOn?: boolean;
 	}
 
-	let { tags, onUpdate, primaryLabel, primaryHint, secondaryLabel, secondaryHint, showSecondary = false }: Props = $props();
+	let { tags, onUpdate, primaryLabel, primaryHint, secondaryLabel, secondaryHint, showSecondary = false, alwaysOn = false }: Props = $props();
 
 	function parseRelays(key: string): string[] {
 		const tag = tags.find(t => t.key === key);
@@ -21,14 +22,17 @@
 	}
 
 	const customEnabled = $derived(
-		tags.some(t => t.key === '1' || t.key === '2')
+		alwaysOn || tags.some(t => t.key === '1' || t.key === '2')
 	);
 
 	const initialPrimary = parseRelays('1');
 	let primaryRows = $state<string[]>(
 		initialPrimary.length > 0 ? initialPrimary : (customEnabled ? [''] : [])
 	);
-	let secondaryRows = $state<string[]>(parseRelays('2'));
+	const initialSecondary = parseRelays('2');
+	let secondaryRows = $state<string[]>(
+		initialSecondary.length > 0 ? initialSecondary : (alwaysOn && showSecondary ? [''] : [])
+	);
 
 	function syncRelays(key: string, rows: string[]) {
 		const filtered = rows.map(r => r.trim()).filter(Boolean);
@@ -78,74 +82,107 @@
 	}
 </script>
 
-<details class="advanced-section">
-	<summary class="advanced-summary">Advanced</summary>
-
-	<div class="advanced-body">
-		<div class="relay-toggle-row">
-			<span class="relay-toggle-label">Use custom relays</span>
-			<button
-				class="toggle-track"
-				class:on={customEnabled}
-				onclick={toggleCustom}
-				role="switch"
-				aria-checked={customEnabled}
-				aria-label="Use custom relays"
-			>
-				<span class="toggle-thumb"></span>
-			</button>
-		</div>
-
-		{#if !customEnabled}
-			<p class="relay-hint">
-				<strong>Custom relays: tradeoffs to consider.</strong> Using specific relays changes your privacy profile in both directions. Picking uncommon relays means your site blends in less with the crowd, but trusted or self-hosted relays avoid exposing activity to third parties you don't control. Running your own relay also gives you control over how long events persist. The default relay network is the safer default if you're unsure.
-			</p>
-		{:else}
-			<div class="relay-group">
-				<div class="relay-group-label">{primaryLabel}{#if primaryHint}<HintIcon tip={primaryHint} />{/if}</div>
-				<div class="relay-list">
-					{#each primaryRows as relay, i}
-						<div class="relay-row">
-							<input
-								type="text"
-								value={relay}
-								oninput={(e) => updatePrimary(i, e.currentTarget.value)}
-								placeholder="wss://relay.example.com"
-							/>
-							<button class="remove-btn" onclick={() => removePrimary(i)} aria-label="Remove relay" title="Remove">&times;</button>
-						</div>
-					{/each}
-					<button class="add-btn" onclick={addPrimary}>+ Add relay</button>
+{#snippet relayGroups()}
+	<div class="relay-group">
+		<div class="relay-group-label">{primaryLabel}{#if primaryHint}<HintIcon tip={primaryHint} />{/if}</div>
+		<div class="relay-list">
+			{#each primaryRows as relay, i}
+				<div class="relay-row">
+					<input
+						type="text"
+						value={relay}
+						oninput={(e) => updatePrimary(i, e.currentTarget.value)}
+						placeholder="wss://relay.example.com"
+					/>
+					<button class="remove-btn" onclick={() => removePrimary(i)} aria-label="Remove relay" title="Remove">&times;</button>
 				</div>
+			{/each}
+			<button class="add-btn" onclick={addPrimary}>+ Add relay</button>
+		</div>
+	</div>
+
+	{#if showSecondary && secondaryLabel}
+		<div class="relay-group">
+			<div class="relay-group-label">{secondaryLabel}{#if secondaryHint}<HintIcon tip={secondaryHint} />{/if}</div>
+			<div class="relay-list">
+				{#each secondaryRows as relay, i}
+					<div class="relay-row">
+						<input
+							type="text"
+							value={relay}
+							oninput={(e) => updateSecondary(i, e.currentTarget.value)}
+							placeholder="wss://relay.example.com"
+						/>
+						<button class="remove-btn" onclick={() => removeSecondary(i)} aria-label="Remove relay" title="Remove">&times;</button>
+					</div>
+				{/each}
+				<button class="add-btn" onclick={addSecondary}>+ Add relay</button>
+			</div>
+		</div>
+	{/if}
+{/snippet}
+
+{#if alwaysOn}
+	<section class="relay-section">
+		<div class="relay-section-label">Relays <span class="relay-required">*</span></div>
+		<p class="relay-hint">
+			<strong>You choose the relays for this store.</strong> There is no default. Orders and inventory live only on the relays you list here, and keeping them reachable is your responsibility. If every relay you list goes offline, the data held there can be lost. Pick relays you trust, or run your own.
+		</p>
+		{@render relayGroups()}
+	</section>
+{:else}
+	<details class="advanced-section">
+		<summary class="advanced-summary">Advanced</summary>
+
+		<div class="advanced-body">
+			<div class="relay-toggle-row">
+				<span class="relay-toggle-label">Use custom relays</span>
+				<button
+					class="toggle-track"
+					class:on={customEnabled}
+					onclick={toggleCustom}
+					role="switch"
+					aria-checked={customEnabled}
+					aria-label="Use custom relays"
+				>
+					<span class="toggle-thumb"></span>
+				</button>
 			</div>
 
-			{#if showSecondary && secondaryLabel}
-				<div class="relay-group">
-					<div class="relay-group-label">{secondaryLabel}{#if secondaryHint}<HintIcon tip={secondaryHint} />{/if}</div>
-					<div class="relay-list">
-						{#each secondaryRows as relay, i}
-							<div class="relay-row">
-								<input
-									type="text"
-									value={relay}
-									oninput={(e) => updateSecondary(i, e.currentTarget.value)}
-									placeholder="wss://relay.example.com"
-								/>
-								<button class="remove-btn" onclick={() => removeSecondary(i)} aria-label="Remove relay" title="Remove">&times;</button>
-							</div>
-						{/each}
-						<button class="add-btn" onclick={addSecondary}>+ Add relay</button>
-					</div>
-				</div>
+			{#if !customEnabled}
+				<p class="relay-hint">
+					<strong>Custom relays: tradeoffs to consider.</strong> Using specific relays changes your privacy profile in both directions. Picking uncommon relays means your site blends in less with the crowd, but trusted or self-hosted relays avoid exposing activity to third parties you don't control. Running your own relay also gives you control over how long events persist. The default relay network is the safer default if you're unsure.
+				</p>
+			{:else}
+				{@render relayGroups()}
 			{/if}
-		{/if}
-	</div>
-</details>
+		</div>
+	</details>
+{/if}
 
 <style>
 	.advanced-section {
 		border-top: 1px solid var(--color-border);
 		margin-top: var(--space-2);
+	}
+
+	.relay-section {
+		border-top: 1px solid var(--color-border);
+		margin-top: var(--space-2);
+		padding-top: var(--space-3);
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	.relay-section-label {
+		font-size: var(--text-sm);
+		font-weight: 500;
+		color: var(--color-text-secondary);
+	}
+
+	.relay-required {
+		color: var(--color-danger, #dc2626);
 	}
 
 	.advanced-summary {

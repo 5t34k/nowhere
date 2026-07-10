@@ -101,8 +101,11 @@
 		{tags}
 		onUpdate={(newTags) => onUpdate('tags', newTags)}
 		primaryLabel="Inventory relays"
+		primaryHint="Where your stock levels are published and read from."
 		secondaryLabel="Order relays"
+		secondaryHint="Where buyers' encrypted orders are delivered to you."
 		showSecondary={true}
+		alwaysOn={true}
 	/>
 </div>
 

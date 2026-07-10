@@ -398,11 +398,13 @@
 		}
 		try {
 			const { generateAvatar } = await import('$lib/nowhere-avatar.js');
+			if (creatorPubkeyHex !== pubkey) return;
 			creatorProfile.avatarSvg = generateAvatar(pubkey, 56);
 		} catch {}
 		if (privacyMode === 0) {
 			try {
 				const event = await fetchProfile({ kinds: [0], authors: [pubkey], limit: 1 }, profileRelays, forumCacheHandle ?? undefined);
+				if (creatorPubkeyHex !== pubkey) return;
 				if (event?.content) {
 					const p = JSON.parse(event.content);
 					creatorProfile.name = p.display_name || p.name || '';
@@ -411,6 +413,7 @@
 					creatorProfile.nip05Verified = null;
 					if (p.nip05) {
 						verifyNip05(p.nip05, pubkey).then(verified => {
+							if (creatorPubkeyHex !== pubkey) return;
 							creatorProfile.nip05Verified = verified;
 						});
 					}
@@ -1175,17 +1178,20 @@
 
 		try {
 			const fp = await computeSellerFingerprint(pubkey);
+			if (postProfileCardPubkey !== pubkey) return;
 			postProfileCardData.phrase = computeVerificationPhrase(fp, 6);
 		} catch {}
 
 		try {
 			const { generateAvatar } = await import('$lib/nowhere-avatar.js');
+			if (postProfileCardPubkey !== pubkey) return;
 			postProfileCardData.avatarSvg = generateAvatar(pubkey, 56);
 		} catch {}
 
 		if (privacyMode === 0) {
 			try {
 				const event = await fetchProfile({ kinds: [0], authors: [pubkey], limit: 1 }, profileRelays, forumCacheHandle ?? undefined);
+				if (postProfileCardPubkey !== pubkey) return;
 				if (event?.content) {
 					const p = JSON.parse(event.content);
 					postProfileCardData.name = p.display_name || p.name || '';
@@ -1195,6 +1201,7 @@
 					postProfileCardData.about = p.about || '';
 					if (p.nip05) {
 						verifyNip05(p.nip05, pubkey).then(verified => {
+							if (postProfileCardPubkey !== pubkey) return;
 							postProfileCardData.nip05Verified = verified;
 						});
 					}

@@ -76,9 +76,14 @@
 	// synchronously, so this just keeps the display fresh in the background.
 	$effect(() => {
 		if (!pubkey) return;
+		// An unkeyed {#each} can reuse this instance for a different author before
+		// an async result lands; the cleanup flips `cancelled` so a stale fetch
+		// cannot overwrite the new author's profile.
+		let cancelled = false;
 		fetchedProfile = null;
 		if (privacyMode === 0) {
 			fetchProfile({ kinds: [0], authors: [pubkey], limit: 1 }, profileRelays, forumCache).then(event => {
+				if (cancelled) return;
 				if (event?.content) {
 					try {
 						const p = JSON.parse(event.content);
@@ -95,9 +100,10 @@
 			avatarSvg = _avatarFn(pubkey, size);
 		} else {
 			_avatarReady.then(fn => {
-				if (fn) avatarSvg = fn(pubkey, size);
+				if (!cancelled && fn) avatarSvg = fn(pubkey, size);
 			});
 		}
+		return () => { cancelled = true; };
 	});
 </script>
 

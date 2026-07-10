@@ -139,17 +139,20 @@
 
 		try {
 			const fp = await computeSellerFingerprint(pubkey);
+			if (profileCardPubkey !== pubkey) return;
 			profileCardData.phrase = computeVerificationPhrase(fp, 6);
 		} catch {}
 
 		try {
 			const { generateAvatar } = await import('$lib/nowhere-avatar.js');
+			if (profileCardPubkey !== pubkey) return;
 			profileCardData.avatarSvg = generateAvatar(pubkey, 56);
 		} catch {}
 
 		if (privacyMode === 0) {
 			try {
 				const event = await fetchProfile({ kinds: [0], authors: [pubkey], limit: 1 }, profileRelays, forumCache);
+				if (profileCardPubkey !== pubkey) return;
 				if (event?.content) {
 					const p = JSON.parse(event.content);
 					profileCardData.name = p.display_name || p.name || '';
@@ -740,7 +743,7 @@
 
 					{#if privatePeers.length > 0}
 						<div class="chat-sidebar-section">PRIVATE</div>
-						{#each privatePeers as peer}
+						{#each privatePeers as peer (peer)}
 							<div class="chat-channel-row">
 								<button
 									class="chat-channel-btn private"
@@ -839,7 +842,7 @@
 					{#if activeMessages.length === 0}
 						<div class="chat-empty">No messages yet. Say something!</div>
 					{:else}
-						{#each activeMessages as msg}
+						{#each activeMessages as msg (msg.eventId)}
 							{#if isRoomAnnouncement(msg)}
 								<div class="chat-room-announcement">
 									<div class="chat-room-announcement-label">Room Created</div>

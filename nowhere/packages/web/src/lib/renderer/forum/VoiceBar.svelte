@@ -135,7 +135,7 @@
 		</button>
 
 		<!-- Remote peers -->
-		{#each peers as peer}
+		{#each peers as peer (peer.pubkey)}
 			<button
 				class="voice-bar-peer"
 				class:voice-bar-peer-speaking={speakingMap.get(peer.pubkey)}

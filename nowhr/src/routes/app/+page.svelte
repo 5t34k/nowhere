@@ -74,7 +74,7 @@
 		{ label: 'Forum',      href: '/create/forum' },
 		{ label: 'Event',      href: '/create/event' },
 		{ label: 'Fundraiser', href: '/create/fundraiser' },
-		{ label: 'Store',      href: '/create/store' },
+		// { label: 'Store',      href: '/create/store' },   // store de-listed (demote-store)
 		{ label: 'Petition',   href: '/create/petition' },
 		{ label: 'Message',    href: '/create/message' },
 		{ label: 'Drop',       href: '/create/drop' },

@@ -14,6 +14,18 @@ export const siteFragment = writable('');
 
 export const hasSite = derived(siteData, ($data) => $data !== null);
 
+// Reset all site stores to their initial defaults. Called synchronously when a
+// renderer page mounts so a client-side navigation never renders the previous
+// site/forum before the current hash is decoded.
+export function resetSiteData(): void {
+	siteData.set(null);
+	decodeError.set(null);
+	v1Deprecated.set(false);
+	isLoading.set(true);
+	siteSigned.set(false);
+	siteFragment.set('');
+}
+
 function isV1Error(e: unknown): boolean {
 	return e instanceof DecodeError && e.code === 'V1_DEPRECATED';
 }

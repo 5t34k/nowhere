@@ -2,6 +2,7 @@
 	import { sanitizeSvg } from '$lib/renderer/utils/svg-sanitize.js';
 	import { sanitizeImageUrl } from '$lib/renderer/utils/sanitize-url.js';
 	import QRCode from 'qrcode';
+	import { siteFragment } from '$lib/renderer/stores/site-data.js';
 
 	interface Props {
 		name: string;
@@ -108,7 +109,13 @@
 	let linkCopied = $state(false);
 
 	$effect(() => {
+		// Regenerate when the forum ($siteFragment) or the salt changes. window.location.href
+		// is the source of truth (carries the salt after a shake) but is not reactive, so we
+		// depend on these explicitly instead of relying on the {#key $siteFragment} remount.
+		void $siteFragment;
+		void salt;
 		if (typeof window !== 'undefined') {
+			qrTooLong = false;
 			QRCode.toDataURL(window.location.href, {
 				width: 512,
 				margin: 2,

@@ -19,6 +19,8 @@
 		expectedPubkey?: string;
 		inventoryConfigured?: boolean;
 		onNavigateToInventory?: () => void;
+		relaysConfigured?: boolean;
+		onNavigateToSettings?: () => void;
 	}
 
 	const defaultNotReadyItems = [
@@ -27,7 +29,9 @@
 		'At least 1 item with name and price'
 	];
 
-	let { result, encryptEnabled, encryptedFragment, onEncryptToggle, onEncrypted, onRemoveEncryption, onUrlChange, notReadyItems = defaultNotReadyItems, pubkeyWarning = false, siteType = 'store', expectedPubkey = '', inventoryConfigured = true, onNavigateToInventory }: Props = $props();
+	let { result, encryptEnabled, encryptedFragment, onEncryptToggle, onEncrypted, onRemoveEncryption, onUrlChange, notReadyItems = defaultNotReadyItems, pubkeyWarning = false, siteType = 'store', expectedPubkey = '', inventoryConfigured = true, onNavigateToInventory, relaysConfigured = true, onNavigateToSettings }: Props = $props();
+
+	const storeNeedsRelays = $derived(siteType === 'store' && !relaysConfigured);
 
 	const encryptLabel = $derived(
 		siteType === 'store' ? 'Encrypt Store' :
@@ -256,6 +260,11 @@
 					<li>{item}</li>
 				{/each}
 			</ul>
+		</div>
+	{:else if storeNeedsRelays}
+		<div class="not-ready">
+			<p>This store has no relays. Orders and inventory have nowhere to live until you add at least one.</p>
+			<p>There is no default relay for stores. Add at least one in <button type="button" class="inventory-warning-link" onclick={() => onNavigateToSettings?.()}>Store Settings</button>, then come back to publish.</p>
 		</div>
 	{:else}
 		{#if siteType === 'store' || siteType === 'forum' || siteType === 'petition'}

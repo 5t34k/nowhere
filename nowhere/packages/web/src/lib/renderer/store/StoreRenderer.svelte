@@ -519,7 +519,7 @@
 {:else if USE_PTR_RELAY}
 	<div class="testing-banner ptr-relay"><span class="ptr-line">CONNECTED TO PRIVATE RELAY</span><span class="ptr-dash"> — </span><span class="ptr-line">TESTING ONLY</span></div>
 {:else}
-	<div class="beta-banner">Nowhere stores are new and not yet proven. Make sure you have another way to contact the seller, and only spend what you are comfortable losing.</div>
+	<div class="beta-banner">Nowhere stores are a demonstration, not a proven way to buy. Only spend what you are comfortable losing, and keep another way to contact the seller.</div>
 {/if}
 
 <StoreHeader

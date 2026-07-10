@@ -24,6 +24,7 @@
 	let showBetaNotice = $state(true);
 
 	const inventoryConfigured = $derived($builderState.tags.some((t) => t.key === 'k'));
+	const relaysConfigured = $derived($builderState.tags.some((t) => t.key === '1' || t.key === '2'));
 	let showImport = $state(false);
 	let lastValidLength = $state(0);
 	let editorCollapsed = $state(false);
@@ -259,6 +260,8 @@
 					expectedPubkey={$builderState.pubkey}
 					{inventoryConfigured}
 					onNavigateToInventory={() => handleNavigate('inventory')}
+					{relaysConfigured}
+					onNavigateToSettings={() => handleNavigate('settings')}
 				/>
 			{/if}
 		{:else if activePanel === 'manage'}
@@ -289,11 +292,14 @@
 	<div class="beta-notice-overlay" role="dialog" aria-modal="true" aria-label="Stop and read this">
 		<div class="beta-notice-dialog">
 			<div class="beta-notice-header">
-				<div class="beta-notice-eyebrow">Nowhere · Early release</div>
-				<h2 class="beta-notice-title">Stop and read this</h2>
+				<div class="beta-notice-eyebrow">Nowhere</div>
+				<h2 class="beta-notice-title">Demonstration only</h2>
 			</div>
 			<div class="beta-notice-body">
 				<p class="beta-notice-lede">
+					This store builder is a demonstration of an idea and the technology behind it: an entire shop encoded into a single link, with no server and no platform.
+				</p>
+				<p>
 					A nowhere store lets you sell directly to buyers with no platform in between. That is the whole point of it, but it also means every risk of running a shop sits with you. Please read the rest of this carefully before you publish.
 				</p>
 				<p>
@@ -303,13 +309,7 @@
 					An order showing in the manage portal is not proof of anything. <strong>There is no way to know that the order is real or that their payment has actually been sent, and you will need to verify both yourself before you ship.</strong>
 				</p>
 				<p>
-					There is no dispute system and no refunds path. If something goes wrong between you and a buyer there is no company behind Nowhere to escalate to.
-				</p>
-				<p>
-					Nothing here has been proven under real load or against real adversaries. Testing is not the same as production, and we do not yet know what may break.
-				</p>
-				<p>
-					We do want people to test Nowhere stores with real orders. That is how the system gets proven. If you publish,<strong> start with small orders and low-value items.</strong> Make sure your contact details are provided so buyers can reach you outside nowhere if their order does not come through or there are any issues.
+					Treat anything you build here as an experiment, not a store to share with real customers.
 				</p>
 			</div>
 			<div class="beta-notice-actions">

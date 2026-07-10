@@ -12,7 +12,7 @@
 		{ name: 'Forum',      href: 'https://hostednowhere.com/forum' },
 		{ name: 'Event',      href: 'https://hostednowhere.com/event' },
 		{ name: 'Fundraiser', href: 'https://hostednowhere.com/fundraiser' },
-		{ name: 'Store',      href: 'https://hostednowhere.com/store' },
+		// { name: 'Store',      href: 'https://hostednowhere.com/store' },   // store de-listed (demote-store)
 		{ name: 'Petition',   href: 'https://hostednowhere.com/petition' },
 		{ name: 'Message',    href: 'https://hostednowhere.com/message' },
 		{ name: 'Drop',       href: 'https://hostednowhere.com/drop' },

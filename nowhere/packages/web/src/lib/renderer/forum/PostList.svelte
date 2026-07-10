@@ -203,7 +203,7 @@
 	{#if searchQuery.trim()}
 		<p class="search-summary">{filteredSortedPosts.length} result{filteredSortedPosts.length === 1 ? '' : 's'} in {topicLabel || 'this topic'}</p>
 	{/if}
-	{#each filteredSortedPosts as post}
+	{#each filteredSortedPosts as post (post.eventId)}
 		{@const postType = getPostType(post)}
 		<!-- svelte-ignore a11y_click_events_have_key_events -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->

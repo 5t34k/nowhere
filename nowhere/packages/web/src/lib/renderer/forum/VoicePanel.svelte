@@ -108,7 +108,7 @@
 			<AuthorIdentity pubkey={sessionPubkey} {privacyMode} size={24} showPhrase={false} showNpub={false} />
 		</button>
 		<!-- Remote peers -->
-		{#each peers as peer}
+		{#each peers as peer (peer.pubkey)}
 			<button
 				class="voice-peer"
 				class:voice-peer-speaking={speakingMap.get(peer.pubkey)}

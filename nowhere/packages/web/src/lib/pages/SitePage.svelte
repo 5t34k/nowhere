@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { onMount, getContext } from 'svelte';
+	import { onMount, onDestroy, getContext } from 'svelte';
 	import { decryptFragment } from '@nowhere/codec';
 
 	const sidebarNav = getContext<{ homeHref?: string }>('sidebarNav') ?? {};
 	const homeHref = sidebarNav.homeHref ?? 'https://hostednowhere.com';
 	import { initHashReader } from '$lib/renderer/utils/hash-reader.js';
-	import { siteData, decodeError, v1Deprecated, isLoading, decodeFromHash } from '$lib/renderer/stores/site-data.js';
+	import { siteData, decodeError, v1Deprecated, isLoading, siteFragment, decodeFromHash, resetSiteData } from '$lib/renderer/stores/site-data.js';
 	import LoadingScreen from '$lib/renderer/components/LoadingScreen.svelte';
 	// Static imports — all types loaded regardless (privacy requirement)
 	import StoreRenderer from '$lib/renderer/store/StoreRenderer.svelte';
@@ -21,6 +21,13 @@
 	let decryptPassword = $state('');
 	let decryptError = $state('');
 	let decrypting = $state(false);
+
+	// Clear any stale site from a previous navigation BEFORE the first render, so
+	// a client-side navigation never paints the previous forum (and never mounts a
+	// renderer against it). On a full page load the stores are already at defaults,
+	// so this is a no-op and matches the prerendered loading shell (no hydration
+	// mismatch). The actual decode happens in onMount via initHashReader().
+	resetSiteData();
 
 	function loadUrl() {
 		const input = urlInput.trim();
@@ -48,8 +55,14 @@
 		}
 	}
 
+	let teardownHashReader: (() => void) | undefined;
+
 	onMount(() => {
-		initHashReader();
+		teardownHashReader = initHashReader();
+	});
+
+	onDestroy(() => {
+		teardownHashReader?.();
 	});
 </script>
 
@@ -105,23 +118,25 @@
 		<footer class="landing-footer">Hosted <a href="https://hostednowhere.com" class="footer-nowhere">nowhere</a>. Present everywhere.</footer>
 	</main>
 {:else if $siteData}
-	{#if $siteData.siteType === 'store'}
-		<StoreRenderer />
-	{:else if $siteData.siteType === 'event'}
-		<EventRenderer />
-	{:else if $siteData.siteType === 'message'}
-		<MessageRenderer />
-	{:else if $siteData.siteType === 'fundraiser'}
-		<FundraiserRenderer />
-	{:else if $siteData.siteType === 'petition'}
-		<PetitionRenderer />
-	{:else if $siteData.siteType === 'discussion'}
-		<ForumRenderer />
-	{:else if $siteData.siteType === 'drop'}
-		<DropRenderer />
-	{:else if $siteData.siteType === 'art'}
-		<ArtRenderer />
-	{/if}
+	{#key $siteFragment}
+		{#if $siteData.siteType === 'store'}
+			<StoreRenderer />
+		{:else if $siteData.siteType === 'event'}
+			<EventRenderer />
+		{:else if $siteData.siteType === 'message'}
+			<MessageRenderer />
+		{:else if $siteData.siteType === 'fundraiser'}
+			<FundraiserRenderer />
+		{:else if $siteData.siteType === 'petition'}
+			<PetitionRenderer />
+		{:else if $siteData.siteType === 'discussion'}
+			<ForumRenderer />
+		{:else if $siteData.siteType === 'drop'}
+			<DropRenderer />
+		{:else if $siteData.siteType === 'art'}
+			<ArtRenderer />
+		{/if}
+	{/key}
 {:else}
 	<main class="center-page landing-shell">
 		<div class="composition">

@@ -8,7 +8,7 @@ export const saltFromHash = writable<string>('');
 
 const textDecoder = new TextDecoder();
 
-export function initHashReader(): void {
+export function initHashReader(): () => void {
 	function update() {
 		let hash = window.location.hash.slice(1); // remove #
 
@@ -46,4 +46,5 @@ export function initHashReader(): void {
 
 	update();
 	window.addEventListener('hashchange', update);
+	return () => window.removeEventListener('hashchange', update);
 }

@@ -147,12 +147,12 @@
 	<div class="buyer-notice-overlay" role="dialog" aria-modal="true" aria-label="Before you pay">
 		<div class="buyer-notice-dialog">
 			<div class="buyer-notice-header">
-				<div class="buyer-notice-eyebrow">Nowhere · Early release</div>
+				<div class="buyer-notice-eyebrow">Nowhere</div>
 				<h2 class="buyer-notice-title">Before you pay</h2>
 			</div>
 			<div class="buyer-notice-body">
 				<p class="buyer-notice-lede">
-					Nowhere is new and has not yet been tested with live orders. Your order is sent through public relays, and there is a chance it may not reach the seller even after you pay.
+					A Nowhere store is a demonstration, not a proven way to buy. Your order is sent through public relays, and there is a real chance it never reaches the seller, even after you pay.
 				</p>
 				<p>
 					If something goes wrong your only route is to contact the seller themselves. Save their contact details before you pay so you can follow up directly, and only spend what you would be comfortable losing if the order never arrives.
@@ -170,12 +170,12 @@
 	<div class="buyer-notice-overlay" role="dialog" aria-modal="true" aria-label="Are you sure">
 		<div class="buyer-notice-dialog">
 			<div class="buyer-notice-header">
-				<div class="buyer-notice-eyebrow buyer-notice-eyebrow-danger">Nowhere · Beta</div>
+				<div class="buyer-notice-eyebrow buyer-notice-eyebrow-danger">Nowhere</div>
 				<h2 class="buyer-notice-title">Are you sure</h2>
 			</div>
 			<div class="buyer-notice-body">
 				<p class="buyer-notice-lede">
-					Nowhere store is in beta. Use only with small amounts and for testing.
+					This is not a reliable way to buy. Do not buy anything here that you are not prepared to lose.
 				</p>
 				<p>
 					<strong>Only spend what you can afford to lose.</strong> Treat every order as if the money may not come back.
